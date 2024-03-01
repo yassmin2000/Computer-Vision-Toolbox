@@ -105,6 +105,16 @@
                <string>Normalization</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>Low Pass Filter</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>High Pass Filter</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="4" column="0">
