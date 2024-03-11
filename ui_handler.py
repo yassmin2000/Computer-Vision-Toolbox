@@ -1,0 +1,195 @@
+
+def handlecomboBoxChange(self):
+        if self.filters_combo.currentIndex() ==0:
+            self.label_3.setVisible(True)
+            self.comboBox_2.setVisible(True)
+            self.label_3.setText("Noise Type")
+            self.comboBox_2.clear()
+            new_options = ["Uniform", "Gaussian", "Salt & pepper"]
+            self.comboBox_2.addItems(new_options)
+            
+        elif self.filters_combo.currentIndex() ==1:
+            self.label_3.setVisible(True)
+            self.comboBox_2.setVisible(True)
+            self.label_3.setText("Filter Type")
+            self.comboBox_2.clear()
+            new_options = ["Average", "Gaussian", "Median"]
+            self.comboBox_2.addItems(new_options)
+            
+        elif self.filters_combo.currentIndex() ==2:
+            self.label_3.setVisible(True)
+            self.comboBox_2.setVisible(True)
+            self.label_3.setText("Detection Method")
+            self.comboBox_2.clear()
+            new_options = ["Sobel" , "Roberts" , "Prewitt","Canny"]
+            self.comboBox_2.addItems(new_options)
+            
+        elif self.filters_combo.currentIndex() ==3:
+            self.label_3.setVisible(True)
+            self.comboBox_2.setVisible(True)
+            self.label_3.setText("Thresholding Method")
+            self.comboBox_2.clear()
+            new_options = ["Global", "Local"]
+            self.comboBox_2.addItems(new_options)
+        elif self.filters_combo.currentIndex() ==5 or self.filters_combo.currentIndex() ==4:
+            self.label_4.setVisible(False)
+            self.lineEdit.setVisible(False)
+            self.label_5.setVisible(False)
+            self.lineEdit_2.setVisible(False)
+        elif self.filters_combo.currentIndex()==6 or self.filters_combo.currentIndex()==7:
+            self.label_3.setVisible(False)
+            self.comboBox_2.setVisible(False)
+            self.label_13.setVisible(False)
+            self.label_21.setVisible(False)
+            self.label_22.setVisible(False)
+            self.label_23.setVisible(False)
+            self.horizontalSlider.setVisible(False)
+            self.horizontalSlider_2.setVisible(False)
+            self.horizontalSlider_3.setVisible(False)
+            self.horizontalSlider_4.setVisible(False)
+            self.label_4.setVisible(True)
+            self.label_4.setText("Cutoff frequency")
+            self.lineEdit.setVisible(True)
+        else:
+            self.label_3.setVisible(False)
+            self.comboBox_2.setVisible(False)
+            self.label_13.setVisible(False)
+            self.label_21.setVisible(False)
+            self.label_22.setVisible(False)
+            self.label_23.setVisible(False)
+            self.horizontalSlider.setVisible(False)
+            self.horizontalSlider_2.setVisible(False)
+            self.horizontalSlider_3.setVisible(False)
+            self.horizontalSlider_4.setVisible(False)
+            
+def handlecomboBoxChange2(self):
+        if self.filters_combo.currentIndex() ==0:
+            self.label_13.setVisible(False)
+            self.label_21.setVisible(False)
+            self.label_22.setVisible(False)
+            self.label_23.setVisible(False)
+            self.horizontalSlider.setVisible(False)
+            self.horizontalSlider_2.setVisible(False)
+            self.horizontalSlider_3.setVisible(False)
+            self.horizontalSlider_4.setVisible(False)
+            self.comboBox.setVisible(False)
+            self.label_12.setVisible(False)
+            if self.comboBox_2.currentIndex()==0: 
+                    self.label_4.setText("Noise Value")
+                    self.label_5.setVisible(False)
+                    self.label_6.setVisible(False)
+                    self.lineEdit_2.setVisible(False)
+                    self.lineEdit_3.setVisible(False)
+            elif self.comboBox_2.currentIndex()==1:
+                    self.label_5.setVisible(True)
+                    self.lineEdit_2.setVisible(True)
+                    self.label_4.setText("Mean")
+                    self.label_5.setText("Sigma")
+                    self.label_6.setVisible(False)
+                    self.lineEdit_3.setVisible(False)
+            else:
+                    self.label_5.setVisible(True)
+                    self.lineEdit_2.setVisible(True)
+                    self.label_4.setText("W pixels")
+                    self.label_5.setText("B pixels")
+                    self.label_6.setVisible(False)
+                    self.lineEdit_3.setVisible(False)
+        elif self.filters_combo.currentIndex() ==1:
+            self.label_13.setVisible(False)
+            self.label_21.setVisible(False)
+            self.label_22.setVisible(False)
+            self.label_23.setVisible(False)
+            self.horizontalSlider.setVisible(False)
+            self.horizontalSlider_2.setVisible(False)
+            self.horizontalSlider_3.setVisible(False)
+            self.horizontalSlider_4.setVisible(False)
+            self.comboBox.setVisible(False)
+            self.label_12.setVisible(False)
+            if self.comboBox_2.currentIndex()==0:
+                self.label_4.setVisible(True)
+                self.lineEdit.setVisible(True) 
+                self.label_4.setText("Kernel size")
+                self.label_5.setVisible(False)
+                self.label_6.setVisible(False)
+                self.lineEdit_2.setVisible(False)
+                self.lineEdit_3.setVisible(False)
+            elif self.comboBox_2.currentIndex()==1:
+                self.label_4.setVisible(True)
+                self.lineEdit.setVisible(True)
+                self.label_4.setText("Sigma")
+                self.label_5.setVisible(False)
+                self.label_6.setVisible(False)
+                self.lineEdit_2.setVisible(False)
+                self.lineEdit_3.setVisible(False)
+            else:
+                self.label_4.setVisible(False)
+                self.label_5.setVisible(False)
+                self.label_6.setVisible(False)
+                self.lineEdit.setVisible(False)
+                self.lineEdit_2.setVisible(False)
+                self.lineEdit_3.setVisible(False)
+        elif self.filters_combo.currentIndex() ==2:
+            self.label_13.setVisible(False)
+            self.label_21.setVisible(False)
+            self.label_22.setVisible(False)
+            self.label_23.setVisible(False)
+            self.horizontalSlider.setVisible(False)
+            self.horizontalSlider_2.setVisible(False)
+            self.horizontalSlider_3.setVisible(False)
+            self.horizontalSlider_4.setVisible(False)
+            self.label_12.setText("Detection type") 
+            if self.comboBox_2.currentIndex()!=3:
+                self.comboBox.clear()
+                new_options = ["Horizontal", "Vertical","Both"]
+                self.comboBox.addItems(new_options)
+                self.label_4.setVisible(False)
+                self.label_5.setVisible(False)
+                self.label_6.setVisible(False)
+                self.lineEdit.setVisible(False)
+                self.lineEdit_2.setVisible(False)
+                self.lineEdit_3.setVisible(False)
+                self.comboBox.setVisible(True)
+                self.label_12.setVisible(True)
+
+            elif self.comboBox_2.currentIndex()==3:
+                    
+                    self.label_4.setVisible(True)
+                    self.lineEdit.setVisible(True)
+                    self.lineEdit_2.setVisible(True)
+                    self.comboBox.setVisible(False)
+                    self.label_5.setVisible(True)
+                    self.label_12.setVisible(False)
+                    self.label_5.setText("High threshold")
+                    self.label_4.setText("Low threshold")
+        
+
+        elif self.filters_combo.currentIndex() ==3:
+            if self.comboBox_2.currentIndex()==0: 
+                self.label_13.setVisible(True)
+                self.horizontalSlider.setVisible(True)
+                self.label_13.setVisible(True)
+                self.label_21.setVisible(False)
+                self.label_22.setVisible(False)
+                self.label_23.setVisible(False)
+                self.horizontalSlider.setVisible(True)
+                self.horizontalSlider_2.setVisible(False)
+                self.horizontalSlider_3.setVisible(False)
+                self.horizontalSlider_4.setVisible(False)
+            else:
+                self.label_4.setVisible(False)
+                self.label_5.setVisible(False)
+                self.label_6.setVisible(False)
+                self.lineEdit.setVisible(False)
+                self.lineEdit_2.setVisible(False)
+                self.lineEdit_3.setVisible(False)
+                self.label_13.setVisible(True)
+                self.label_21.setVisible(True)
+                self.label_22.setVisible(True)
+                self.label_23.setVisible(True)
+                self.horizontalSlider.setVisible(True)
+                self.horizontalSlider_2.setVisible(True)
+                self.horizontalSlider_3.setVisible(True)
+                self.horizontalSlider_4.setVisible(True)
+                self.comboBox.setVisible(False)
+                self.label_12.setVisible(False)
+        

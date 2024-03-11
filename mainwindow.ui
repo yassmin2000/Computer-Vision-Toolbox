@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1168</width>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="filters">
        <attribute name="title">
@@ -532,7 +532,7 @@
                  <item>
                   <widget class="QLabel" name="label_11">
                    <property name="text">
-                    <string>HP Cutoff</string>
+                    <string>Cutoff frequency</string>
                    </property>
                   </widget>
                  </item>
@@ -544,14 +544,23 @@
                <item row="0" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_5">
                  <item>
-                  <widget class="QLabel" name="label_10">
-                   <property name="text">
-                    <string>LP Cutoff</string>
-                   </property>
+                  <widget class="QComboBox" name="comboBox_3">
+                   <item>
+                    <property name="text">
+                     <string>Choose Filter</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Low Pass Filter</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>High Pass Filter</string>
+                    </property>
+                   </item>
                   </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit_4"/>
                  </item>
                 </layout>
                </item>
@@ -591,14 +600,23 @@
                <item row="0" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
                  <item>
-                  <widget class="QLabel" name="label_14">
-                   <property name="text">
-                    <string>LP Cutoff</string>
-                   </property>
+                  <widget class="QComboBox" name="comboBox_4">
+                   <item>
+                    <property name="text">
+                     <string>Choose Filter</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Low Pass Filter</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>High Pass Filter</string>
+                    </property>
+                   </item>
                   </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit_8"/>
                  </item>
                 </layout>
                </item>
@@ -607,7 +625,7 @@
                  <item>
                   <widget class="QLabel" name="label_15">
                    <property name="text">
-                    <string>Hp Cutoff</string>
+                    <string>Cutoff frequency</string>
                    </property>
                   </widget>
                  </item>
@@ -714,8 +732,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>21</height>
+     <width>1168</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>
