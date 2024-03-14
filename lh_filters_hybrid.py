@@ -3,7 +3,7 @@ import numpy as np
 
 def fourier_transform(input_img):
     img = input_img 
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     fourier = np.fft.fft2(gray_img)
     fourier_shifted = np.fft.fftshift(fourier)
     return fourier_shifted
@@ -24,6 +24,13 @@ def low_high_filters(freq, img_data):
 
 
 def hybrid_image(hybrid_input_1, hybrid_input_2, freq_1, freq_2, combo_3_index, combo_4_index):
+    w_1 , h_1 ,_ = hybrid_input_1.shape
+    w_2 , h_2 , _ = hybrid_input_2.shape
+    if w_1*h_1 > w_2*h_2:
+        hybrid_input_1 = cv2.resize(hybrid_input_1, (w_2, h_2))
+    else:
+        hybrid_input_2 = cv2.resize(hybrid_input_2, (w_1, h_1))
+
     img_1 = fourier_transform(hybrid_input_1)
     img_2 = fourier_transform(hybrid_input_2)
     lowpass_filter_1, highpass_filter_1 = low_high_filters(float(freq_1), img_1)
@@ -43,6 +50,10 @@ def hybrid_image(hybrid_input_1, hybrid_input_2, freq_1, freq_2, combo_3_index, 
         print("Error: Images have different shapes")
 
     hybrid = img_1 + img_2
-    hybrid_img = np.fft.ifftshift(hybrid)
-    hybrid_img_out = np.abs(np.fft.ifft2(hybrid_img))
+    # hybrid_img = np.fft.ifftshift(hybrid)
+    hybrid_img_out =np.abs( np.fft.ifft2(hybrid)).astype(np.uint8)
+
+    # hybrid_img_out = np.abs(np.fft.ifft2(hybrid_img))
+    hybrid_img_out = cv2.cvtColor(hybrid_img_out, cv2.COLOR_GRAY2RGB)
+
     return hybrid_img_out

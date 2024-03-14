@@ -15,10 +15,14 @@ class mainwindow (QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         uic.loadUi("mainwindow.ui",self)
+        self.tabWidget.setCurrentIndex(0)
         self.original_img =[]
         self.gray_img = np.array([], dtype=np.uint8)
         self.processed_img=[]
         self.hybrid_input=[]
+        self.hybrid_input_1=[]
+        self.hybrid_input_2=[]
+
         self.filters_combo.currentIndexChanged.connect(self.handlecomboBoxChange)
         self.comboBox_2.currentIndexChanged.connect(self.handlecomboBoxChange2)
         self.pushButton.clicked.connect(self.apply_button_clicked)
@@ -69,6 +73,7 @@ class mainwindow (QtWidgets.QMainWindow):
             self.comboBox_4.currentIndex()
         )
         self.display_image(img_out, self.graphicsView_4)
+
     def browse_image(self,widget):
             file_dialog = QFileDialog()
             file_dialog.setNameFilter("Images (*.png *.jpg *.bmp *.gif)")
@@ -77,67 +82,31 @@ class mainwindow (QtWidgets.QMainWindow):
             if file_dialog.exec_():
                 selected_file = file_dialog.selectedFiles()[0]
                 # Create an instance of the Image class with the selected image path
-                self.original_img=  cv2.imread(selected_file)
-                self.hybrid_input=  cv2.imread(selected_file)
-                self.gray_img =self.convert_gry(self.original_img)
-                if widget == self.graphicsView: 
-                    if self.radioButton_2.isChecked():
-                        self.radioButton.setChecked(False)
-                        
-                        self.display_image(self.gray_img,widget)
-                        self.display_image(self.gray_img,self.graphicsView_6)
-                    else:
-                        self.radioButton_2.setChecked(False)
-                        self.display_image(self.original_img,widget)
-                        self.display_image(self.gray_img,self.graphicsView_6)
+                tap_index = self.check_tap()
+                if tap_index :
+                    if widget == self.graphicsView_3: 
+                        self.hybrid_input_1=  cv2.imread(selected_file)
+                        self.hybrid_input_1 = cv2.cvtColor(self.hybrid_input_1, cv2.COLOR_BGR2RGB)
+                        self.display_image(self.hybrid_input_1,widget)
+                    elif widget == self.graphicsView_5:   
+                        self.hybrid_input_2=  cv2.imread(selected_file)
+                        self.hybrid_input_2 = cv2.cvtColor(self.hybrid_input_2, cv2.COLOR_BGR2RGB)
+                        self.display_image(self.hybrid_input_2,widget)
                 else:
-                     self.display_image(self.hybrid_input,widget)
+                    self.original_img=  cv2.imread(selected_file)
+                    self.gray_img =self.convert_gry(self.original_img)
+                    self.processed_img=self.gray_img
+                    if widget == self.graphicsView: 
+                        if self.radioButton_2.isChecked():
+                            self.radioButton.setChecked(False)
+                            
+                            self.display_image(self.gray_img,widget)
+                            self.display_image(self.gray_img,self.graphicsView_6)
+                        else:
+                            self.radioButton_2.setChecked(False)
+                            self.display_image(self.original_img,widget)
+                            self.display_image(self.gray_img,self.graphicsView_6)
 
-
-    # def display_image(self, img_data, widget):
-    #     # Get the size of the widget
-    #     widget_width = widget.width()
-    #     widget_height = widget.height()
-
-    #     # Check if the image is grayscale or color
-    #     if len(img_data.shape) == 2:  # Grayscale image
-    #         img_height, img_width = img_data.shape
-    #         bytes_per_line = img_width
-    #         q_image = QImage(img_data.data, img_width, img_height, bytes_per_line, QImage.Format_Grayscale8)
-    #     elif len(img_data.shape) == 3:  # Color image
-    #         img_height, img_width, channels = img_data.shape
-    #         bytes_per_line = 3 * img_width
-    #         q_image = QImage(img_data.data, img_width, img_height, bytes_per_line, QImage.Format_RGB888)
-    #     else:
-    #         raise ValueError("Unsupported image format.")
-
-    #     # Calculate the new width and height to maintain the aspect ratio
-    #     aspect_ratio = img_width / img_height
-    #     if aspect_ratio > 1:
-    #         new_width = widget_width
-    #         new_height = int(widget_width / aspect_ratio)
-    #     else:
-    #         new_height = widget_height
-    #         new_width = int(widget_height * aspect_ratio)
-
-    #     # Resize the image using OpenCV
-    #     # resized_image = cv2.resize(img_data, (new_width, new_height))
-
-    #     # Convert the OpenCV image to QImage
-    #     # height, width = resized_image.shape[:2]
-    #     # bytes_per_line = 3 * width
-    #     # q_image = QImage(resized_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-
-    #     # Create a QGraphicsScene
-    #     scene = QGraphicsScene(self)
-    #     widget.setScene(scene)
-
-    #     # Create a QPixmap from the QImage
-    #     pixmap = QPixmap.fromImage(q_image)
-
-    #     # Create a QGraphicsPixmapItem and add it to the scene
-    #     pixmap_item = QGraphicsPixmapItem(pixmap)
-    #     scene.addItem(pixmap_item)
     def display_image(self, img_data, widget):
         # Get the size of the widget
         widget_width = widget.width()
@@ -247,28 +216,32 @@ class mainwindow (QtWidgets.QMainWindow):
             if self.comboBox_2.currentIndex()==0:
                 noise_value=int(self.lineEdit.text())
                 result=apply_uniform_noise(self.gray_img, noise_value)
+                self.processed_img=apply_uniform_noise(self.processed_img, noise_value)
             elif self.comboBox_2.currentIndex()==1:
                 mean=int(self.lineEdit.text())
                 sigma=int(self.lineEdit_2.text())
                 result=apply_gaussian_noise(self.gray_img, mean, sigma)
+                self.processed_img=apply_gaussian_noise(self.processed_img, mean, sigma)
             else :
                 w=float(self.lineEdit_2.text())
                 b=float(self.lineEdit.text())
                 result=apply_salt_and_pepper_noise(self.gray_img, w, b)
+                self.processed_img=apply_salt_and_pepper_noise(self.processed_img, w, b)
             self.display_image(result, self.graphicsView_2)
             
         elif self.filters_combo.currentIndex() == 1:
             if self.comboBox_2.currentIndex()==0:
                 kernel_size=int(self.lineEdit.text())
                 result=apply_average_filter(self.gray_img, kernel_size)
+                self.processed_img=apply_average_filter(self.processed_img, kernel_size)
             elif self.comboBox_2.currentIndex()==1:
                 sigma=int(self.lineEdit.text())
-                
                 result=apply_gaussian_filter(self.gray_img,sigma)
+                self.processed_img=apply_gaussian_filter(self.processed_img,sigma)
             elif self.comboBox_2.currentIndex()==2:
-                
                 result=apply_median_filter(self.gray_img)
-            self.display_image(result, self.graphicsView_2)
+                self.processed_img=apply_median_filter(self.processed_img)
+            self.display_image(self.processed_img, self.graphicsView_2)
             
         elif self.filters_combo.currentIndex() == 2:
             selected_index = self.comboBox_2.currentIndex()
@@ -300,6 +273,7 @@ class mainwindow (QtWidgets.QMainWindow):
             output_img =np.abs( np.fft.ifft2(output))
             output_img = output_img.astype(np.uint8)
             self.display_image(output_img,self.graphicsView_2)
+            
 if __name__ == "__main__":
     Main_App = QtWidgets.QApplication(sys.argv)
     App=mainwindow()

@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.io import imread, imsave
+# from pip install scikit-image
+# import imread, imsave
 
 def global_thresholding(image, t):
     # If the image is colored, change it to grayscale, otherwise take the image as it is
