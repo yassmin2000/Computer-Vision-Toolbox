@@ -14,8 +14,8 @@ def sobel_operator(image, direction):
     elif direction == "Vertical":
         kernel = kernel_vertical
     elif direction == "Both":
-        kernel_horizontal = cv2.filter2D(image, cv2.CV_64F, kernel_horizontal)
-        kernel_vertical = cv2.filter2D(image, cv2.CV_64F, kernel_vertical)
+        kernel_horizontal = convolve2D(image, kernel_horizontal)
+        kernel_vertical = convolve2D(image, kernel_vertical)
         edges = np.sqrt(kernel_horizontal**2 + kernel_vertical**2)
         edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX)
         edges = edges.astype('uint8')
@@ -23,8 +23,8 @@ def sobel_operator(image, direction):
     else:
         raise ValueError("Invalid direction. Use 'Horizontal', 'Vertical', or 'Both'.")
 
-    result = cv2.filter2D(image, cv2.CV_64F, kernel)
-    result = np.abs(result)
+    result = convolve2D(image, kernel)
+    # result = np.abs(result)
     result = cv2.normalize(result, None, 0, 255, cv2.NORM_MINMAX)
     result = result.astype('uint8')
 
@@ -34,14 +34,26 @@ def roberts_operator(image, direction):
     kernel_diagonal1 = np.array([[1, 0], [0, -1]])
     kernel_diagonal2 = np.array([[0, 1], [-1, 0]])
 
-    result_diagonal1 = cv2.filter2D(image, cv2.CV_64F, kernel_diagonal1)
-    result_diagonal2 = cv2.filter2D(image, cv2.CV_64F, kernel_diagonal2)
+    if direction == "Horizontal":
+        kernel = kernel_diagonal1
+    elif direction == "Vertical":
+        kernel = kernel_diagonal2
+    elif direction == "Both":
+        kernel_horizontal = convolve2D(image, kernel_diagonal1)
+        kernel_vertical = convolve2D(image, kernel_diagonal2)
+        edges = np.sqrt(kernel_horizontal**2 + kernel_vertical**2)
+        edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX)
+        edges = edges.astype('uint8')
+        return edges
+    else:
+        raise ValueError("Invalid direction. Use 'Horizontal', 'Vertical', or 'Both'.")
 
-    edges = np.sqrt(result_diagonal1**2 + result_diagonal2**2)
-    edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX)
-    edges = edges.astype('uint8')
+    result = convolve2D(image, kernel)
+    # result = np.abs(result)
+    result = cv2.normalize(result, None, 0, 255, cv2.NORM_MINMAX)
+    result = result.astype('uint8')
 
-    return edges
+    return result
 
 def prewitt_operator(image, direction):
     kernel_horizontal = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
@@ -52,8 +64,8 @@ def prewitt_operator(image, direction):
     elif direction == "Vertical":
         kernel = kernel_vertical
     elif direction == "Both":
-        kernel_horizontal = cv2.filter2D(image, cv2.CV_64F, kernel_horizontal)
-        kernel_vertical = cv2.filter2D(image, cv2.CV_64F, kernel_vertical)
+        kernel_horizontal = convolve2D(image, kernel_horizontal)
+        kernel_vertical = convolve2D(image, kernel_vertical)
         edges = np.sqrt(kernel_horizontal**2 + kernel_vertical**2)
         edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX)
         edges = edges.astype('uint8')
@@ -61,8 +73,8 @@ def prewitt_operator(image, direction):
     else:
         raise ValueError("Invalid direction. Use 'Horizontal', 'Vertical', or 'Both'.")
 
-    result = cv2.filter2D(image, cv2.CV_64F, kernel)
-    result = np.abs(result)
+    result = convolve2D(image, kernel)
+    # result = np.abs(result)
     result = cv2.normalize(result, None, 0, 255, cv2.NORM_MINMAX)
     result = result.astype('uint8')
 
@@ -119,3 +131,37 @@ def canny_operator(image, low_threshold, high_threshold):
     #             edges[i, j] = 255  # Promote weak edges to strong edges
 
     # return edges.astype('uint8')
+def convolve2D(image, kernel, padding=0, strides=1):
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Cross Correlation
+        kernel = np.flipud(np.fliplr(kernel))
+
+        # Gather Shapes of Kernel + Image + Padding
+        xKernShape = kernel.shape[0]
+        yKernShape = kernel.shape[1]
+        xImgShape = image.shape[0]
+        yImgShape = image.shape[1]
+
+        # Shape of Output Convolution
+        xOutput = int(((xImgShape - xKernShape + 2 * padding) / strides) + 1)
+        yOutput = int(((yImgShape - yKernShape + 2 * padding) / strides) + 1)
+        output = np.zeros((xOutput, yOutput))
+
+        for y in range(image.shape[1]):
+            # Exit Convolution
+            if y > image.shape[1] - yKernShape:
+                break
+            # Only Convolve if y has gone down by the specified Strides
+            if y % strides == 0:
+                for x in range(image.shape[0]):
+                    # Go to next row once kernel is out of bounds
+                    if x > image.shape[0] - xKernShape:
+                        break
+                    try:
+                        # Only Convolve if x has moved by the specified Strides
+                        if x % strides == 0:
+                            output[x, y] = (kernel * image[x: x + xKernShape, y: y + yKernShape]).sum()
+                    except:
+                        break
+
+        return output

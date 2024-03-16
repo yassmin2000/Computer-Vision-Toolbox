@@ -33,6 +33,8 @@ def handlecomboBoxChange(self):
             self.comboBox_2.addItems(new_options)
         elif self.filters_combo.currentIndex() ==5 or self.filters_combo.currentIndex() ==4:
             self.label_4.setVisible(False)
+            self.label_3.setVisible(False)
+            self.comboBox_2.setVisible(False)
             self.lineEdit.setVisible(False)
             self.label_5.setVisible(False)
             self.lineEdit_2.setVisible(False)
@@ -192,4 +194,10 @@ def handlecomboBoxChange2(self):
                 self.horizontalSlider_4.setVisible(True)
                 self.comboBox.setVisible(False)
                 self.label_12.setVisible(False)
-        
+        elif self.filters_combo.currentIndex() ==5 or self.filters_combo.currentIndex() ==4:
+            self.label_4.setVisible(False)
+            self.label_3.setVisible(False)
+            self.comboBox_2.setVisible(False)
+            self.lineEdit.setVisible(False)
+            self.label_5.setVisible(False)
+            self.lineEdit_2.setVisible(False)

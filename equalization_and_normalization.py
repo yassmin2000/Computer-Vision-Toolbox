@@ -1,7 +1,7 @@
 import numpy as np
 from PyQt5.QtGui import QImage
 
-from histogram import histogram
+
 import cv2
 
 

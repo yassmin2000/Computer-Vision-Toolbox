@@ -6,6 +6,7 @@ from noise import apply_uniform_noise, apply_gaussian_noise, apply_salt_and_pepp
 from filters import apply_average_filter, apply_gaussian_filter,apply_median_filter
 from edge_detection import sobel_operator, roberts_operator, prewitt_operator, canny_operator
 from thresholding import global_thresholding, local_thresholding
+from histogram import calculate_histogram,histogram_to_qimage,display_qimage
 import lh_filters_hybrid
 import equalization_and_normalization
 import numpy as np
@@ -26,6 +27,8 @@ class mainwindow (QtWidgets.QMainWindow):
         self.filters_combo.currentIndexChanged.connect(self.handlecomboBoxChange)
         self.comboBox_2.currentIndexChanged.connect(self.handlecomboBoxChange2)
         self.pushButton.clicked.connect(self.apply_button_clicked)
+        self.pushButton_3.clicked.connect(self.clear)
+        self.pushButton_4.clicked.connect(self.clear)
         self.graphicsView.mouseDoubleClickEvent = lambda event: self.browse_image(self.graphicsView)
         self.graphicsView_3.mouseDoubleClickEvent = lambda event: self.browse_image(self.graphicsView_3)
         self.graphicsView_5.mouseDoubleClickEvent = lambda event: self.browse_image(self.graphicsView_5)
@@ -76,7 +79,7 @@ class mainwindow (QtWidgets.QMainWindow):
 
     def browse_image(self,widget):
             file_dialog = QFileDialog()
-            file_dialog.setNameFilter("Images (*.png *.jpg *.bmp *.gif)")
+            file_dialog.setNameFilter("Images (*.png *.jpg *.bmp *.gif *.jpeg)")
             file_dialog.setFileMode(QFileDialog.ExistingFile)
             
             if file_dialog.exec_():
@@ -86,11 +89,11 @@ class mainwindow (QtWidgets.QMainWindow):
                 if tap_index :
                     if widget == self.graphicsView_3: 
                         self.hybrid_input_1=  cv2.imread(selected_file)
-                        self.hybrid_input_1 = cv2.cvtColor(self.hybrid_input_1, cv2.COLOR_BGR2RGB)
+                        # self.hybrid_input_1 = cv2.cvtColor(self.hybrid_input_1, cv2.COLOR_BGR2RGB)
                         self.display_image(self.hybrid_input_1,widget)
                     elif widget == self.graphicsView_5:   
                         self.hybrid_input_2=  cv2.imread(selected_file)
-                        self.hybrid_input_2 = cv2.cvtColor(self.hybrid_input_2, cv2.COLOR_BGR2RGB)
+                        # self.hybrid_input_2 = cv2.cvtColor(self.hybrid_input_2, cv2.COLOR_BGR2RGB)
                         self.display_image(self.hybrid_input_2,widget)
                 else:
                     self.original_img=  cv2.imread(selected_file)
@@ -102,10 +105,12 @@ class mainwindow (QtWidgets.QMainWindow):
                             
                             self.display_image(self.gray_img,widget)
                             self.display_image(self.gray_img,self.graphicsView_6)
+                            self.histogram_plot(self.gray_img, self.graphicsView_8)
                         else:
                             self.radioButton_2.setChecked(False)
                             self.display_image(self.original_img,widget)
                             self.display_image(self.gray_img,self.graphicsView_6)
+                            self.histogram_plot(self.gray_img, self.graphicsView_8)
 
     def display_image(self, img_data, widget):
         # Get the size of the widget
@@ -228,6 +233,8 @@ class mainwindow (QtWidgets.QMainWindow):
                 result=apply_salt_and_pepper_noise(self.gray_img, w, b)
                 self.processed_img=apply_salt_and_pepper_noise(self.processed_img, w, b)
             self.display_image(result, self.graphicsView_2)
+            self.display_image(result, self.graphicsView_7)
+            self.histogram_plot(result, self.graphicsView_9)
             
         elif self.filters_combo.currentIndex() == 1:
             if self.comboBox_2.currentIndex()==0:
@@ -242,6 +249,8 @@ class mainwindow (QtWidgets.QMainWindow):
                 result=apply_median_filter(self.gray_img)
                 self.processed_img=apply_median_filter(self.processed_img)
             self.display_image(self.processed_img, self.graphicsView_2)
+            self.display_image(self.processed_img, self.graphicsView_7)
+            self.histogram_plot(self.processed_img, self.graphicsView_9)
             
         elif self.filters_combo.currentIndex() == 2:
             selected_index = self.comboBox_2.currentIndex()
@@ -258,10 +267,14 @@ class mainwindow (QtWidgets.QMainWindow):
             equalized_image_array = equalization_and_normalization.equalization(self.gray_img)
             # q_image = self.convert_array_to_image(equalized_image_array, self.gray_img.dtype)
             self.display_image(equalized_image_array, self.graphicsView_2)
+            self.display_image(equalized_image_array, self.graphicsView_7)
+            self.histogram_plot(equalized_image_array, self.graphicsView_9)
         elif self.filters_combo.currentIndex() == 5:
             normalized_image_array=equalization_and_normalization.normalization(self.gray_img)
             # q_image = self.convert_array_to_image(normalized_image_array, self.gray_img.dtype)
             self.display_image(normalized_image_array, self.graphicsView_2)
+            self.display_image(normalized_image_array, self.graphicsView_7)
+            self.histogram_plot(normalized_image_array, self.graphicsView_9)
         elif self.filters_combo.currentIndex()==6 or self.filters_combo.currentIndex()==7:
             img= lh_filters_hybrid.fourier_transform(self.original_img)
             lowpass_filter , highpass_filter = lh_filters_hybrid.low_high_filters(float(self.lineEdit.text()),img)
@@ -273,6 +286,37 @@ class mainwindow (QtWidgets.QMainWindow):
             output_img =np.abs( np.fft.ifft2(output))
             output_img = output_img.astype(np.uint8)
             self.display_image(output_img,self.graphicsView_2)
+            self.display_image(output_img, self.graphicsView_7)
+            self.histogram_plot(output_img, self.graphicsView_9)
+
+    def histogram_plot(self, image, widget):
+        # histogram_array = histogram.calculate_histogram(image)
+        # self.display_image(histogram_array, widget)
+        histogram_array = calculate_histogram(image)
+        histogram_image = histogram_to_qimage(histogram_array)
+        scene = QGraphicsScene(self)
+        display_qimage(histogram_image, widget,scene)
+    def clear(self):
+        tap_index = self.check_tap()
+        if tap_index :
+            self.hybrid_input=[]
+            self.hybrid_input_1=[]
+            self.hybrid_input_2=[]
+            self.graphicsView_3.scene().clear()
+            self.graphicsView_4.scene().clear()
+            self.graphicsView_5.scene().clear()
+        else:
+            self.original_img =[]
+            self.gray_img = np.array([], dtype=np.uint8)
+            self.processed_img=[]
+            self.graphicsView.scene().clear()
+            self.graphicsView_2.scene().clear()
+            self.graphicsView_6.scene().clear()
+            self.graphicsView_7.scene().clear()
+            self.graphicsView_8.scene().clear()
+            self.graphicsView_9.scene().clear()
+
+
             
 if __name__ == "__main__":
     Main_App = QtWidgets.QApplication(sys.argv)
