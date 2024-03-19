@@ -12,70 +12,54 @@ def calculate_histogram(image):
     return hist
 
 def histogram_to_qimage(hist):
-    # Create a blank QImage with a white background
-    q_image = QImage(4096, 250, QImage.Format_Grayscale8)
-    q_image.fill(255)
-
-    image_width = 4096
-    # image_width = 512
-    image_height = 200  # Adjust this value to leave space below the histogram
+    # Calculate maximum histogram value
     max_hist_value = max(hist)
 
+    # Determine image dimensions
     num_bins = len(hist)
-    total_space = image_width - num_bins  # Total available space for bars and gaps
-    gap_size = 1  # Size of gap between bars
-    bar_width = total_space // num_bins  # Width of each bar
+    image_width = num_bins
+    image_height = max_hist_value + 50  # Add space for axes labels
+
+    # Create a blank QImage with a white background
+    q_image = QImage(image_width, image_height, QImage.Format_RGB32)
+    q_image.fill(Qt.white)
+
+    # Create a QPainter to draw on the QImage
+    painter = QPainter()
+    painter.begin(q_image)
+
+    # Set pen color to black for drawing histogram bars and axes
+    painter.setPen(Qt.black)
 
     # Draw histogram bars
     for i, value in enumerate(hist):
-        bar_height = int(value * (image_height - 1) / max_hist_value)  # Adjust height calculation
+        bar_height = value  # Use histogram value directly for height
 
-        # Calculate the start position of each bar
-        start_x = i * (bar_width + gap_size)
+        # Draw a vertical line for each bin in the histogram
+        painter.drawLine(i, image_height - 50, i, image_height - 50 - bar_height)
 
-        for x in range(start_x, start_x + bar_width):
-            for y in range(image_height - bar_height, image_height):
-                q_image.setPixel(x, y, 0)
+    # Draw x-axis (intensity level)
+    painter.drawLine(0, image_height - 50, image_width - 1, image_height - 50)
 
-        # Draw label on the x-axis
-        label_x = start_x + bar_width // 2 - 10  # Adjust for alignment
-        label_y = image_height + 15  # Position below the x-axis
-        label_value = str(i)  # Display the index of the bin
-        font = QFont("Arial", 10)  # Increase font size
-        painter = QPainter(q_image)
-        painter.setFont(font)
-        painter.drawText(label_x, label_y, label_value)
+    # Draw y-axis (frequency)
+    painter.drawLine(0, 0, 0, image_height - 50)
+
+    # Add labels to axes
+    font = QFont("Arial", 10)
+    painter.setFont(font)
+    painter.drawText(image_width - 20, image_height - 20, "Intensity Level")
+    painter.drawText(10, 10, "Frequency")
+
+    # End painting
+    painter.end()
 
     return q_image
 
-
-def display_qimage(q_image, widget, scene):
-    # Get the size of the widget
-    widget_width = widget.width()
-    widget_height = widget.height()
-
-    # Calculate the aspect ratio of the image
-    aspect_ratio = q_image.width() / q_image.height()
-
-    # Calculate the new width and height to maintain the aspect ratio
-    if aspect_ratio > 1:
-        new_width = widget_width
-        new_height = int(widget_width / aspect_ratio)
-    else:
-        new_height = widget_height
-        new_width = int(widget_height * aspect_ratio)
-
-    # Scale the image to the new dimensions
-    # scaled_image = q_image.scaled(new_width, new_height, aspectMode=Qt.KeepAspectRatio)
-
-    # Create a QGraphicsScene
-    # scene = QGraphicsScene()
-    widget.setScene(scene)
-
-    # Create a QPixmap from the scaled QImage
+def display_qimage(q_image, widget):
+    # Convert QImage to QPixmap
     pixmap = QPixmap.fromImage(q_image)
 
-    # Create a QGraphicsPixmapItem and add it to the scene
-    pixmap_item = QGraphicsPixmapItem(pixmap)
-    scene.addItem(pixmap_item)
-
+    # Create a QPainter to draw on the widget
+    painter = QPainter(widget)
+    painter.drawPixmap(widget.rect(), pixmap)
+    painter.end()
