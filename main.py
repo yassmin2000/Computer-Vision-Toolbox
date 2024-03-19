@@ -41,6 +41,10 @@ class mainwindow(QtWidgets.QMainWindow):
         self.pushButton_3.clicked.connect(self.clear)
         self.pushButton_4.clicked.connect(self.clear)
         self.pushButton_5.clicked.connect(self.show_histogram)
+        self.horizontalSlider.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_2.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_3.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_4.valueChanged.connect(self.update_label_text)
         self.graphicsView.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.graphicsView
         )
@@ -109,7 +113,22 @@ class mainwindow(QtWidgets.QMainWindow):
             elif self.radioButton_2.isChecked():
                 # Display gray image
                 self.display_image(self.gray_img, self.graphicsView)
+    def update_label_text(self, value):
+        # Get the sender object that emitted the signal
+        sender = self.sender()
 
+        # Define a dictionary to map slider objects to label objects
+        slider_label_map = {
+            self.horizontalSlider: self.label_37,
+            self.horizontalSlider_2: self.label_38,
+            self.horizontalSlider_3: self.label_39,
+            self.horizontalSlider_4: self.label_40,
+        }
+
+        # Update the text of the corresponding label with the slider value
+        label = slider_label_map.get(sender)
+        if label:
+            label.setText(str(value))
     def check_tap(self):
         if self.tabWidget.currentIndex() == 2:
             return 1
@@ -406,6 +425,8 @@ class mainwindow(QtWidgets.QMainWindow):
     def show_histogram(self):
         rgb_histogram_window = RGBHistogramWindow(self.original_img)
         rgb_histogram_window.show_histogram_window(self.original_img)
+
+
     def clear(self):
         tap_index = self.check_tap()
         if tap_index:
