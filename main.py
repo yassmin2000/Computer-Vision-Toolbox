@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QGraphicsPixmapItem, QFileDialog, QGraphicsScene,QVBoxLayout
+from PyQt5.QtWidgets import QGraphicsPixmapItem, QFileDialog, QGraphicsScene,QVBoxLayout,QMessageBox
 from ui_handler import handlecomboBoxChange, handlecomboBoxChange2, handelcomboxchanges3
 from noise import apply_uniform_noise, apply_gaussian_noise, apply_salt_and_pepper_noise
 from filters import apply_average_filter, apply_gaussian_filter, apply_median_filter
@@ -14,6 +14,7 @@ from thresholding import global_thresholding, local_thresholding
 from histogram import calculate_histogram, histogram_to_qimage, display_qimage
 from custom import HistogramWidget  # Import HistogramWidget class
 from popup import RGBHistogramWindow
+from popup2 import CurvesWindow
 import lh_filters_hybrid
 import equalization_and_normalization
 import numpy as np
@@ -94,6 +95,15 @@ class mainwindow(QtWidgets.QMainWindow):
         self.comboBox_2.addItems(new_options)
         self.radioButton.setChecked(True)
         self.pushButton_2.clicked.connect(self.hybrid_image)
+
+        self.pushButton_6.clicked.connect(self.show_distribution_curves)
+
+    def show_distribution_curves(self):
+        if self.gray_img.size > 0 and self.processed_img.size > 0:
+            distribution_window = CurvesWindow(self.gray_img,self.processed_img)
+            distribution_window.exec_()
+        else:
+            QMessageBox.warning(self, "Warning", "Gray image or processed image is not loaded yet.")
 
     def handlecomboBoxChange(self):
         handlecomboBoxChange(self)
@@ -444,8 +454,16 @@ class mainwindow(QtWidgets.QMainWindow):
             self.graphicsView_2.scene().clear()
             self.graphicsView_6.scene().clear()
             self.graphicsView_7.scene().clear()
-            self.graphicsView_8.scene().clear()
-            self.graphicsView_9.scene().clear()
+            self.clear_layout(self.widget.layout())
+            self.clear_layout(self.widget_2.layout())
+
+    def clear_layout(self,layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
 
 
 if __name__ == "__main__":

@@ -276,7 +276,7 @@ QComboBox:on { /* shift the text when the popup opens */
 </string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="filters">
      <attribute name="title">
@@ -747,6 +747,30 @@ font-weight: bold;</string>
       <string>Histogram</string>
      </attribute>
      <layout class="QGridLayout" name="gridLayout_8">
+      <item row="0" column="2">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QLabel" name="label_18">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Output Image</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGraphicsView" name="graphicsView_7"/>
+        </item>
+       </layout>
+      </item>
       <item row="0" column="0">
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
@@ -771,23 +795,7 @@ font-weight: bold;</string>
         </item>
        </layout>
       </item>
-      <item row="0" column="1">
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="0" colspan="3">
+      <item row="2" column="0" colspan="3">
        <layout class="QHBoxLayout" name="horizontalLayout_13">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -865,29 +873,28 @@ font-weight: bold;</string>
         </item>
        </layout>
       </item>
-      <item row="0" column="2">
-       <layout class="QVBoxLayout" name="verticalLayout_7">
-        <item>
-         <widget class="QLabel" name="label_18">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Output Image</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGraphicsView" name="graphicsView_7"/>
-        </item>
-       </layout>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="QPushButton" name="pushButton_6">
+        <property name="text">
+         <string>Show statistical curves</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
