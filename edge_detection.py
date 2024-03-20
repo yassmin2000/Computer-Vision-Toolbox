@@ -98,25 +98,25 @@ def canny_operator(image, low_threshold, high_threshold):
 #     return gradient_magnitude, gradient_direction
 
 # def non_maximum_suppression(gradient_magnitude, gradient_direction):
-    suppressed_image = np.zeros_like(gradient_magnitude)
-    for i in range(1, gradient_magnitude.shape[0] - 1):
-        for j in range(1, gradient_magnitude.shape[1] - 1):
-            angle = gradient_direction[i, j]
-            neighbors = []
+    # suppressed_image = np.zeros_like(gradient_magnitude)
+    # for i in range(1, gradient_magnitude.shape[0] - 1):
+    #     for j in range(1, gradient_magnitude.shape[1] - 1):
+    #         angle = gradient_direction[i, j]
+    #         neighbors = []
 
-            if (0 <= angle < 22.5) or (157.5 <= angle <= 180):
-                neighbors = [gradient_magnitude[i, j - 1], gradient_magnitude[i, j + 1]]
-            elif 22.5 <= angle < 67.5:
-                neighbors = [gradient_magnitude[i - 1, j - 1], gradient_magnitude[i + 1, j + 1]]
-            elif 67.5 <= angle < 112.5:
-                neighbors = [gradient_magnitude[i - 1, j], gradient_magnitude[i + 1, j]]
-            elif 112.5 <= angle < 157.5:
-                neighbors = [gradient_magnitude[i - 1, j + 1], gradient_magnitude[i + 1, j - 1]]
+    #         if (0 <= angle < 22.5) or (157.5 <= angle <= 180):
+    #             neighbors = [gradient_magnitude[i, j - 1], gradient_magnitude[i, j + 1]]
+    #         elif 22.5 <= angle < 67.5:
+    #             neighbors = [gradient_magnitude[i - 1, j - 1], gradient_magnitude[i + 1, j + 1]]
+    #         elif 67.5 <= angle < 112.5:
+    #             neighbors = [gradient_magnitude[i - 1, j], gradient_magnitude[i + 1, j]]
+    #         elif 112.5 <= angle < 157.5:
+    #             neighbors = [gradient_magnitude[i - 1, j + 1], gradient_magnitude[i + 1, j - 1]]
 
-            if neighbors and gradient_magnitude[i, j] >= max(neighbors):
-                suppressed_image[i, j] = gradient_magnitude[i, j]
+    #         if neighbors and gradient_magnitude[i, j] >= max(neighbors):
+    #             suppressed_image[i, j] = gradient_magnitude[i, j]
 
-    return suppressed_image
+    # return suppressed_image
 
 # def edge_tracking_by_hysteresis(suppressed_image, high_threshold, low_threshold):
     # edges = np.zeros_like(suppressed_image)

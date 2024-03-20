@@ -57,3 +57,36 @@ def hybrid_image(hybrid_input_1, hybrid_input_2, freq_1, freq_2, combo_3_index, 
     hybrid_img_out = cv2.cvtColor(hybrid_img_out, cv2.COLOR_GRAY2RGB)
 
     return hybrid_img_out
+def hybrid_image(hybrid_input_1, hybrid_input_2, freq_1, freq_2, combo_3_index, combo_4_index):
+    h_1, w_1, _ = hybrid_input_1.shape
+    h_2, w_2, _ = hybrid_input_2.shape
+    
+    # Resize the images to have the same dimensions
+    if h_1 != h_2 or w_1 != w_2:
+        hybrid_input_1 = cv2.resize(hybrid_input_1, (w_2, h_2))
+        hybrid_input_2 = cv2.resize(hybrid_input_2, (w_2, h_2))
+
+    img_1 = fourier_transform(hybrid_input_1)
+    img_2 = fourier_transform(hybrid_input_2)
+    lowpass_filter_1, highpass_filter_1 = low_high_filters(float(freq_1), img_1)
+    lowpass_filter_2, highpass_filter_2 = low_high_filters(float(freq_2), img_2)
+
+    if combo_3_index == 1:
+        img_1 = img_1 * lowpass_filter_1
+    elif combo_3_index == 2:
+        img_1 = img_1 * highpass_filter_1
+
+    if combo_4_index == 1:
+        img_2 = img_2 * lowpass_filter_2
+    elif combo_4_index == 2:
+        img_2 = img_2 * highpass_filter_2
+
+    if img_1.shape != img_2.shape:
+        print("Error: Images have different shapes")
+        return None
+
+    hybrid = img_1 + img_2
+    hybrid_img_out = np.abs(np.fft.ifft2(hybrid)).astype(np.uint8)
+    hybrid_img_out = cv2.cvtColor(hybrid_img_out, cv2.COLOR_GRAY2RGB)
+
+    return hybrid_img_out

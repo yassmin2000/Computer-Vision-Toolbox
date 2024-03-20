@@ -314,6 +314,9 @@ class mainwindow(QtWidgets.QMainWindow):
             edges = canny_operator(self.original_img, low_threshold, high_threshold)
 
         self.display_image(edges, self.graphicsView_2)
+        self.display_image(edges, self.graphicsView_7)
+            
+
 
     def thresholding(self):
         if self.comboBox_2.currentIndex() == 0:
@@ -334,7 +337,7 @@ class mainwindow(QtWidgets.QMainWindow):
     def apply_button_clicked(self):
         if self.filters_combo.currentIndex() == 0:
             if self.comboBox_2.currentIndex() == 0:
-                noise_value = int(self.lineEdit.text())
+                noise_value = float(self.lineEdit.text())
                 result = apply_uniform_noise(self.gray_img, noise_value)
                 self.processed_img = apply_uniform_noise(
                     self.processed_img, noise_value
@@ -388,6 +391,8 @@ class mainwindow(QtWidgets.QMainWindow):
                 )
             else:
                 self.edge_detection(selected_method, selected_dir, 0, 0)
+            # self.display_image(self.processed_img, self.graphicsView_7)
+            
         elif self.filters_combo.currentIndex() == 4:
             equalized_image_array = equalization_and_normalization.equalization(
                 self.gray_img
@@ -455,7 +460,9 @@ class mainwindow(QtWidgets.QMainWindow):
             self.graphicsView_6.scene().clear()
             self.graphicsView_7.scene().clear()
             self.clear_layout(self.widget.layout())
-            self.clear_layout(self.widget_2.layout())
+            if self.filters_combo.currentIndex() !=2 :
+                
+                self.clear_layout(self.widget_2.layout())
 
     def clear_layout(self,layout):
         while layout.count():

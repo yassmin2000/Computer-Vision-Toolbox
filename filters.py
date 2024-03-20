@@ -1,38 +1,9 @@
 import cv2
 import numpy as np
 import scipy.stats as st
+from scipy import stats as st
 
 
-# def apply_average_filter(img, kernel_size):
-#     image_width, image_height = img.shape
-
-#     # Develop Averaging filter(3, 3) mask
-#     mask = np.ones([kernel_size, kernel_size], dtype=int)
-#     mask = mask / (kernel_size * kernel_size)
-
-#     # Convolve the kernel over the image
-#     img_new = np.zeros_like(img, dtype=int)
-
-#     for i in range(1, image_width - 1):
-#         for j in range(1, image_height - 1):
-#             temp = (
-#                 img[i - 1, j - 1] * mask[0, 0]
-#                 + img[i - 1, j] * mask[0, 1]
-#                 + img[i - 1, j + 1] * mask[0, 2]
-#                 + img[i, j - 1] * mask[1, 0]
-#                 + img[i, j] * mask[1, 1]
-#                 + img[i, j + 1] * mask[1, 2]
-#                 + img[i + 1, j - 1] * mask[2, 0]
-#                 + img[i + 1, j] * mask[2, 1]
-#                 + img[i + 1, j + 1] * mask[2, 2]
-#             )
-
-#             img_new[i, j] = temp
-
-#     img_new = img_new.astype(np.uint8)
-
-
-#     return img_new
 def apply_average_filter(img, kernel_size):
     image_width, image_height = img.shape
     img_new = np.zeros_like(img, dtype=np.float64)
@@ -60,8 +31,6 @@ def apply_average_filter(img, kernel_size):
 
     return img_new.astype(img.dtype)
 
-
-#     return img_new
 # def gaussian_kernel(kernel_size, sigma):
 #     """Generates a Gaussian kernel."""
 #     # Generate 1D Gaussian kernels
@@ -81,10 +50,6 @@ def apply_average_filter(img, kernel_size):
 #     img_new = cv2.filter2D(img, -1, kernel)
 
 #     return img_new
-
-
-import numpy as np
-from scipy import stats as st
 
 
 def apply_gaussian_filter(img, sigma):

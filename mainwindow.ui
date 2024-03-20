@@ -270,7 +270,7 @@ QComboBox:on { /* shift the text when the popup opens */
 </string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="filters">
        <attribute name="title">
@@ -289,7 +289,7 @@ QComboBox:on { /* shift the text when the popup opens */
           <item>
            <widget class="QGraphicsView" name="graphicsView">
             <property name="styleSheet">
-             <string notr="true"/>
+             <string notr="true">background-color: rgb(148, 148, 148);</string>
             </property>
            </widget>
           </item>
@@ -301,7 +301,11 @@ QComboBox:on { /* shift the text when the popup opens */
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="graphicsView_2"/>
+           <widget class="QGraphicsView" name="graphicsView_2">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(148, 148, 148);</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -433,7 +437,7 @@ font-weight: bold;</string>
              <item>
               <widget class="QLabel" name="label_39">
                <property name="text">
-                <string>TextLabel</string>
+                <string>        0      </string>
                </property>
               </widget>
              </item>
@@ -502,7 +506,7 @@ font-weight: bold;</string>
              <item>
               <widget class="QLabel" name="label_37">
                <property name="text">
-                <string>TextLabel</string>
+                <string>        0      </string>
                </property>
               </widget>
              </item>
@@ -527,7 +531,7 @@ font-weight: bold;</string>
              <item>
               <widget class="QLabel" name="label_38">
                <property name="text">
-                <string>TextLabel</string>
+                <string>        0      </string>
                </property>
               </widget>
              </item>
@@ -705,7 +709,7 @@ font-weight: bold;</string>
              <item>
               <widget class="QLabel" name="label_40">
                <property name="text">
-                <string>TextLabel</string>
+                <string>        0      </string>
                </property>
               </widget>
              </item>

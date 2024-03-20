@@ -1,7 +1,5 @@
 import numpy as np
 from PyQt5.QtGui import QImage
-
-
 import cv2
 
 
@@ -82,7 +80,14 @@ def equalization(image):
 
 
 def normalization(image):
-    minimum_value = np.min(image)
-    maximum_value = np.max(image)
-    normalized_image = (image - minimum_value)*(255 / (maximum_value - minimum_value))
-    return normalized_image.astype(np.uint8)
+    minimum_value = float(np.min(image))
+    maximum_value = float(np.max(image))
+    scaled_image = (image - minimum_value) / (maximum_value - minimum_value) * 255.0
+    normalized_image = np.clip(scaled_image, 0, 255).astype(np.uint8)
+    return normalized_image
+
+
+# def normalize(img):
+#     lmin = float(img.min())
+#     lmax = float(img.max())
+#     return np.floor((img-lmin)/(lmax-lmin)*225.0)
