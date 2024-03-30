@@ -1,6 +1,12 @@
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QGraphicsPixmapItem, QFileDialog, QGraphicsScene,QVBoxLayout,QMessageBox
+from PyQt5.QtWidgets import (
+    QGraphicsPixmapItem,
+    QFileDialog,
+    QGraphicsScene,
+    QVBoxLayout,
+    QMessageBox,
+)
 from ui_handler import handlecomboBoxChange, handlecomboBoxChange2, handelcomboxchanges3
 from noise import apply_uniform_noise, apply_gaussian_noise, apply_salt_and_pepper_noise
 from filters import apply_average_filter, apply_gaussian_filter, apply_median_filter
@@ -20,6 +26,10 @@ import equalization_and_normalization
 import numpy as np
 import sys
 import cv2
+from circle import hough_circles
+from lines import hough_line_detection
+import matplotlib as plt
+from elipse import edge_ellipse_detector
 
 
 class mainwindow(QtWidgets.QMainWindow):
@@ -74,17 +84,10 @@ class mainwindow(QtWidgets.QMainWindow):
         self.horizontalSlider_7.setVisible(False)
         self.label_26.setVisible(False)
         self.horizontalSlider_8.setVisible(False)
-        self.label_27.setVisible(False)
-        self.horizontalSlider_9.setVisible(False)
-        self.label_28.setVisible(False)
-        self.label_29.setVisible(False)
-        self.label_30.setVisible(False)
-        self.label_31.setVisible(False)
         self.label_32.setVisible(False)
         self.label_33.setVisible(False)
         self.label_34.setVisible(False)
         self.label_35.setVisible(False)
-        self.label_36.setVisible(False)
         self.label_37.setVisible(False)
         self.label_38.setVisible(False)
         self.label_39.setVisible(False)
@@ -97,13 +100,80 @@ class mainwindow(QtWidgets.QMainWindow):
         self.pushButton_2.clicked.connect(self.hybrid_image)
 
         self.pushButton_6.clicked.connect(self.show_distribution_curves)
+        self.apply_objdetect_btn.clicked.connect(self.handle_apply_objdetect_btn)
+
+    def handle_apply_objdetect_btn(self):
+
+        if self.types.currentIndex() == 0:
+            img = self.original_img
+            if self.kernalsize.currentIndex() == 0:
+                kernal = 3
+            elif self.kernalsize.currentIndex() == 1:
+                kernal = 5
+            output_img = canny_operator(img, 50, 100, kernal)
+            self.display_image(output_img, self.graphicsView_11)
+
+        elif self.types.currentIndex() == 1:
+            number_of_lines = self.horizontalSlider_5.value()
+            low_threshold = self.horizontalSlider_6.value()
+            high_threshold = self.horizontalSlider_7.value()
+            # low_threshold = 50
+            # high_threshold = 100
+            # neighborhood_size = self.horizontalSlider_8.value()
+            img = self.original_img
+            detected_lines, hough_space = hough_line_detection(
+                img, number_of_lines, low_threshold, high_threshold
+            )
+            output_image = np.copy(img)
+
+            for rho, theta in detected_lines:
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a * rho
+                y0 = b * rho
+                x1 = int(x0 + 1000 * (-b))
+                y1 = int(y0 + 1000 * (a))
+                x2 = int(x0 - 1000 * (-b))
+                y2 = int(y0 - 1000 * (a))
+                cv2.line(output_image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.imwrite("output/hough_line_detected.jpg", output_image)
+
+            self.display_image(output_image, self.graphicsView_11)
+
+        elif self.types.currentIndex() == 2:
+            thickness = int(self.horizontalSlider_5.value() / 10)
+            img = self.original_img
+            color = "Red"
+            # edge_image = canny_operator(img , 50 ,100)
+            # out = houghEllipses(edge_image, a_min=20, a_max=100, b_min=20, b_max=100,
+            #       delta_a=1, delta_b=1, num_thetas=100, bin_threshold=0.4,
+            #       min_edge_threshold=100, max_edge_threshold=200,
+            #       pixel_threshold=20, post_process=True)
+            output_img = edge_ellipse_detector(img, thickness, color)
+            self.display_image(output_img, self.graphicsView_11)
+
+        elif self.types.currentIndex() == 3:
+            min_raduis = self.horizontalSlider_5.value()
+            max_raduis = self.horizontalSlider_6.value()
+            bin_threshold = self.horizontalSlider_7.value() / 10
+            pixel_threshold = self.horizontalSlider_8.value()
+            circle_color = "Red"
+            edges = canny_operator(
+                self.original_img, low_threshold=50, high_threshold=100
+            )
+            output = hough_circles(
+                circle_color, edges, min_raduis, max_raduis, 1, 100, 0.4, 20, True
+            )
+            self.display_image(output, self.graphicsView_11)
 
     def show_distribution_curves(self):
         if self.gray_img.size > 0 and self.processed_img.size > 0:
-            distribution_window = CurvesWindow(self.gray_img,self.processed_img)
+            distribution_window = CurvesWindow(self.gray_img, self.processed_img)
             distribution_window.exec_()
         else:
-            QMessageBox.warning(self, "Warning", "Gray image or processed image is not loaded yet.")
+            QMessageBox.warning(
+                self, "Warning", "Gray image or processed image is not loaded yet."
+            )
 
     def handlecomboBoxChange(self):
         handlecomboBoxChange(self)
@@ -123,6 +193,7 @@ class mainwindow(QtWidgets.QMainWindow):
             elif self.radioButton_2.isChecked():
                 # Display gray image
                 self.display_image(self.gray_img, self.graphicsView)
+
     def update_label_text(self, value):
         # Get the sender object that emitted the signal
         sender = self.sender()
@@ -133,12 +204,22 @@ class mainwindow(QtWidgets.QMainWindow):
             self.horizontalSlider_2: self.label_38,
             self.horizontalSlider_3: self.label_39,
             self.horizontalSlider_4: self.label_40,
+            self.horizontalSlider_5: self.label_32,
+            self.horizontalSlider_6: self.label_33,
+            self.horizontalSlider_7: self.label_34,
+            self.horizontalSlider_8: self.label_35,
+            self.horizontalSlider_9: self.label_28,
+            self.horizontalSlider_10: self.label_30,
+            self.horizontalSlider_11: self.label_36,
+            self.horizontalSlider_12: self.label_42,
+            self.horizontalSlider_13: self.label_44,
         }
 
         # Update the text of the corresponding label with the slider value
         label = slider_label_map.get(sender)
         if label:
             label.setText(str(value))
+
     def check_tap(self):
         if self.tabWidget.currentIndex() == 2:
             return 1
@@ -315,8 +396,6 @@ class mainwindow(QtWidgets.QMainWindow):
 
         self.display_image(edges, self.graphicsView_2)
         self.display_image(edges, self.graphicsView_7)
-            
-
 
     def thresholding(self):
         if self.comboBox_2.currentIndex() == 0:
@@ -392,7 +471,7 @@ class mainwindow(QtWidgets.QMainWindow):
             else:
                 self.edge_detection(selected_method, selected_dir, 0, 0)
             # self.display_image(self.processed_img, self.graphicsView_7)
-            
+
         elif self.filters_combo.currentIndex() == 4:
             equalized_image_array = equalization_and_normalization.equalization(
                 self.gray_img
@@ -430,17 +509,19 @@ class mainwindow(QtWidgets.QMainWindow):
 
     def histogram_plot(self, image, widget):
         histogram_array = calculate_histogram(image)
-        histogram_widget = HistogramWidget(histogram_array)  # Create instance of HistogramWidget
+        histogram_widget = HistogramWidget(
+            histogram_array
+        )  # Create instance of HistogramWidget
         if widget.layout() is None:  # Check if widget has a layout
             layout = QVBoxLayout()  # Create a vertical layout
             widget.setLayout(layout)  # Set the layout to the widget
         else:
             layout = widget.layout()  # Get the existing layout
         layout.addWidget(histogram_widget)  # Add HistogramWidget to the layout
+
     def show_histogram(self):
         rgb_histogram_window = RGBHistogramWindow(self.original_img)
         rgb_histogram_window.show_histogram_window(self.original_img)
-
 
     def clear(self):
         tap_index = self.check_tap()
@@ -460,17 +541,16 @@ class mainwindow(QtWidgets.QMainWindow):
             self.graphicsView_6.scene().clear()
             self.graphicsView_7.scene().clear()
             self.clear_layout(self.widget.layout())
-            if self.filters_combo.currentIndex() !=2 :
-                
+            if self.filters_combo.currentIndex() != 2:
+
                 self.clear_layout(self.widget_2.layout())
 
-    def clear_layout(self,layout):
+    def clear_layout(self, layout):
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
             if widget:
                 widget.deleteLater()
-
 
 
 if __name__ == "__main__":
