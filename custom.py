@@ -12,6 +12,12 @@ class HistogramWidget(QWidget):
         self.hist=histogram_data
 
     def paintEvent(self, event):
+        """
+    Handles the painting of the widget's content.
+    
+    Parameters:
+    - event: the paint event that triggered the painting
+    """
         painter = QPainter(self)
         painter.setPen(self.color)  # Set the color for drawing
 
@@ -36,6 +42,16 @@ class HistogramWidget(QWidget):
         self.draw_histogram(painter, self.hist, self.width(), self.height())
 
     def draw_histogram(self, painter, hist, widget_width, widget_height):
+        """
+    Draws a histogram on the widget using the provided QPainter and histogram data.
+
+    Parameters:
+    - painter: the QPainter object used for drawing
+    - hist: the histogram data to be visualized
+    - widget_width: the width of the widget
+    - widget_height: the height of the widget
+    """
+
         max_hist_value = max(hist)
         num_bins = len(hist)
         total_space = widget_width - num_bins  # Total available space for bars and gaps

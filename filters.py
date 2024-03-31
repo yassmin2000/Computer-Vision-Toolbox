@@ -5,6 +5,16 @@ from scipy import stats as st
 
 
 def apply_average_filter(img, kernel_size):
+    """
+    Apply an average filter to the input image.
+    
+    Parameters:
+    - img: the input image to be filtered
+    - kernel_size: the size of the square averaging filter
+    
+    Returns:
+    - img_new: the resulting image after applying the average filter
+    """
     image_width, image_height = img.shape
     img_new = np.zeros_like(img, dtype=np.float64)
 
@@ -56,6 +66,16 @@ def apply_average_filter(img, kernel_size):
 
 
 def apply_gaussian_filter(img, sigma):
+    """
+    Apply a Gaussian filter to the input image.
+    
+    Parameters:
+    - img: the input image to be filtered
+    - sigma: the standard deviation of the Gaussian filter
+    
+    Returns:
+    - img_new: the resulting image after applying the Gaussian filter with pixel values cast to uint8
+    """
     kernel_size = 3  # Constant kernel size
     image_width, image_height= img.shape
 
@@ -117,6 +137,15 @@ def apply_gaussian_filter(img, sigma):
 
 
 def apply_median_filter(img):
+    """
+    Apply a median filter to the input image.
+    
+    Parameters:
+    - img: the input image to be filtered
+    
+    Returns:
+    - img_new: the resulting image after applying the median filter with pixel values cast to uint8
+    """
     kernel_size = 3
     image_width, image_height = img.shape
 

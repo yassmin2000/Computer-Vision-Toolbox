@@ -5,6 +5,16 @@ import matplotlib.pyplot as plt
 # import imread, imsave
 
 def global_thresholding(image, t):
+    """
+    Apply global thresholding on the input image to create a binary image.
+    
+    Parameters:
+    - image: the input image to be thresholded
+    - t: the threshold value
+    
+    Returns:
+    - final_img: the binary image after thresholding
+    """
     # If the image is colored, change it to grayscale, otherwise take the image as it is
     if (image.ndim == 3):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -19,6 +29,19 @@ def global_thresholding(image, t):
     return final_img
 
 def local_thresholding(image, t1, t2, t3, t4):
+    """
+    Apply local thresholding on the input image to create a binary image.
+    
+    Parameters:
+    - image: the input image to be thresholded
+    - t1: the threshold value for the top-left section of the image
+    - t2: the threshold value for the top-right section of the image
+    - t3: the threshold value for the bottom-left section of the image
+    - t4: the threshold value for the bottom-right section of the image
+    
+    Returns:
+    - final_img: the binary image after thresholding
+    """
     # If the image is colored, change it to grayscale, otherwise take the image as it is
     if (image.ndim == 3):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

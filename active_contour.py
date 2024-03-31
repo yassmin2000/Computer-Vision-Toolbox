@@ -7,6 +7,24 @@ def active_contour( image, snake, alpha=0.01, beta=0.1,
                        w_line=0, w_edge=1, gamma=0.01,
                        max_px_move=1.0,
                        max_num_iter=2500, convergence=0.1):
+        """
+    Implements the active contour model for image segmentation.
+
+    Args:
+        image: Input image.
+        snake: Initial snake contour.
+        alpha: Weight of the continuity term.
+        beta: Weight of the curvature term.
+        w_line: Weight of the line integral term.
+        w_edge: Weight of the edge integral term.
+        gamma: Weight of the gradient magnitude term.
+        max_px_move: Maximum pixel movement.
+        max_num_iter: Maximum number of iterations.
+        convergence: Convergence criterion.
+
+    Returns:
+        Contour points after segmentation.
+    """
         max_num_iter = int(max_num_iter)
         if max_num_iter <= 0:
             raise ValueError("max_num_iter should be >0.")

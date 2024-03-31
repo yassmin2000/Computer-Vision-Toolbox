@@ -24,6 +24,15 @@ import cv2
 #     return equalized_image
 
 def equalization(image):
+    """
+    Perform histogram equalization on the input image.
+    
+    Parameters:
+    - image: the input image to be equalized
+    
+    Returns:
+    - equalized_image: the resulting equalized image with pixel values cast to uint8
+    """
     # Calculate histogram
     hist, bins = np.histogram(image.flatten(), 256, [0, 256])
 
@@ -80,6 +89,15 @@ def equalization(image):
 
 
 def normalization(image):
+    """
+    Normalize the input image to the range [0, 255].
+    
+    Parameters:
+    - image: the input image to be normalized
+    
+    Returns:
+    - normalized_image: the resulting normalized image with pixel values cast to uint8
+    """
     minimum_value = float(np.min(image))
     maximum_value = float(np.max(image))
     scaled_image = (image - minimum_value) / (maximum_value - minimum_value) * 255.0

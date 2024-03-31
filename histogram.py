@@ -7,11 +7,29 @@ from matplotlib import pyplot as plt
 
 
 def calculate_histogram(image):
+    """
+    Calculate the histogram of the input image.
+    
+    Parameters:
+    - image: the input image
+    
+    Returns:
+    - hist: the histogram of pixel intensities in the image
+    """
     # Calculate histogram
     hist, _ = np.histogram(image.flatten(), 256, [0, 256])
     return hist
 
 def histogram_to_qimage(hist):
+    """
+    Convert a histogram to a QImage for display.
+    
+    Parameters:
+    - hist: the histogram data to be converted
+    
+    Returns:
+    - q_image: the QImage representing the histogram with axes labels
+    """
     # Calculate maximum histogram value
     max_hist_value = max(hist)
 
@@ -56,6 +74,13 @@ def histogram_to_qimage(hist):
     return q_image
 
 def display_qimage(q_image, widget):
+    """
+    Display a QImage on a widget using QPainter.
+    
+    Parameters:
+    - q_image: the QImage to be displayed
+    - widget: the widget on which to display the image
+    """
     # Convert QImage to QPixmap
     pixmap = QPixmap.fromImage(q_image)
 

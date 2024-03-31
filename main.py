@@ -48,18 +48,18 @@ class mainwindow(QtWidgets.QMainWindow):
         self.hybrid_input_2 = []
         self.transformed_img = []
         self.segmentation_img = []
-        self.seg_img_height =0
-        self.seg_img_width =0
+        self.seg_img_height = 0
+        self.seg_img_width = 0
         self.center_x = 0
         self.center_y = 0
         self.radius = 0
-        self.s=np.linspace(0, 2 * np.pi, 400)
+        self.s = np.linspace(0, 2 * np.pi, 400)
         self.r = np.zeros_like(self.s)
         self.c = np.zeros_like(self.s)
         self.init_coords = np.array([self.r, self.c]).T
-        self.canvas = FigureCanvas(plt.figure()) 
-        
-        self.canvas.mpl_connect('button_press_event', self.on_mouse_press)
+        self.canvas = FigureCanvas(plt.figure())
+
+        self.canvas.mpl_connect("button_press_event", self.on_mouse_press)
         self.filters_combo.currentIndexChanged.connect(self.handlecomboBoxChange)
         self.comboBox_2.currentIndexChanged.connect(self.handlecomboBoxChange2)
         self.types.currentIndexChanged.connect(self.handelcomboxchanges3)
@@ -122,36 +122,54 @@ class mainwindow(QtWidgets.QMainWindow):
         self.horizontalSlider_11.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_12.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_13.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_5.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_6.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_7.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_8.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_9.setMinimum(0)
-        
-        self.horizontalSlider_9.setMaximum(100)  # Maximum value set to 1 scaled to integer
-        self.horizontalSlider_9.setSingleStep(1)  # Step size set to 0.01 scaled to integer
+
+        self.horizontalSlider_9.setMaximum(
+            100
+        )  # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_9.setSingleStep(
+            1
+        )  # Step size set to 0.01 scaled to integer
 
         # Adjustments for beta (self.horizontalSlider_10)
         self.horizontalSlider_10.setMinimum(0)
-          # Starting value set to 0.1 scaled to integer
-        self.horizontalSlider_10.setMaximum(100)  # Maximum value set to 1 scaled to integer
-        self.horizontalSlider_10.setSingleStep(1)  # Step size set to 0.1 scaled to integer
+        # Starting value set to 0.1 scaled to integer
+        self.horizontalSlider_10.setMaximum(
+            100
+        )  # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_10.setSingleStep(
+            1
+        )  # Step size set to 0.1 scaled to integer
 
         # Adjustments for gamma (self.horizontalSlider_11)
         self.horizontalSlider_11.setMinimum(0)
-          # Starting value set to 0.01 scaled to integer
-        self.horizontalSlider_11.setMaximum(100)  # Maximum value set to 1 scaled to integer
-        self.horizontalSlider_11.setSingleStep(1)  # Step size set to 0.01 scaled to integer
+        # Starting value set to 0.01 scaled to integer
+        self.horizontalSlider_11.setMaximum(
+            100
+        )  # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_11.setSingleStep(
+            1
+        )  # Step size set to 0.01 scaled to integer
 
         # Adjustments for max_num_iter (self.horizontalSlider_12)
         self.horizontalSlider_12.setMinimum(500)  # Minimum value set to 500
-          # Starting value set to 2500
+        # Starting value set to 2500
         self.horizontalSlider_12.setMaximum(10000)  # Maximum value set to 10000
         self.horizontalSlider_12.setSingleStep(500)  # Step size set to 500
 
         # Adjustments for convergence (self.horizontalSlider_13)
         self.horizontalSlider_13.setMinimum(0)
-        self.horizontalSlider_13.setValue(10)  # Starting value set to 0.1 scaled to integer
-          # Maximum value set to 1 scaled to integer
-        self.horizontalSlider_13.setSingleStep(1)  # Step size set to 0.01 scaled to integer
-
-
+        self.horizontalSlider_13.setValue(
+            10
+        )  # Starting value set to 0.1 scaled to integer
+        # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_13.setSingleStep(
+            1
+        )  # Step size set to 0.01 scaled to integer
 
         self.comboBox_2.clear()
         new_options = ["Uniform", "Gaussian", "Salt & pepper"]
@@ -163,6 +181,33 @@ class mainwindow(QtWidgets.QMainWindow):
         self.apply_objdetect_btn.clicked.connect(self.handle_apply_objdetect_btn)
 
     def handle_apply_objdetect_btn(self):
+        """
+         Apply the selected object detection method to the loaded image.
+         If Canny edge detection method is selected, the user can choose
+         the kernel size using the combo box.
+
+         If Hough line detection method is selected, the user can choose
+         the number of lines to detect, lower threshold, upper threshold,
+         neighborhood size and step size using the sliders and export the
+        detected lines as a new image.
+
+         If edge ellipse detection method is selected, the user can choose
+         the thickness and edge color using the sliders and export the
+         detected ellipses as a new image.
+
+         If Hough circle detection method is selected, the user can choose
+         the minimum and maximum radius, bin threshold, pixel threshold
+         and edge color using the sliders and export the detected circles
+        as a new image.
+
+         Parameters
+         ----------
+        None
+
+         Returns
+         -------
+        None
+        """
 
         if self.types.currentIndex() == 0:
             img = self.original_img
@@ -215,8 +260,7 @@ class mainwindow(QtWidgets.QMainWindow):
         elif self.types.currentIndex() == 3:
             min_raduis = self.horizontalSlider_5.value()
             max_raduis = self.horizontalSlider_6.value()
-            bin_threshold = self.horizontalSlider_7.value() / 10
-            pixel_threshold = self.horizontalSlider_8.value()
+            
             circle_color = "Red"
             edges = canny_operator(
                 self.original_img, low_threshold=50, high_threshold=100
@@ -226,7 +270,18 @@ class mainwindow(QtWidgets.QMainWindow):
             )
             self.display_image(output, self.graphicsView_11)
 
+   
+
     def show_distribution_curves(self):
+        """
+        This function is used to display the distribution curves.
+
+        If the gray image and processed image are loaded, it opens a new window (CurvesWindow) to show the distribution curves.
+        If either the gray image or the processed image is not loaded, it shows a warning message box with the message "Gray image or processed image is not loaded yet."
+
+        Returns:
+            None
+        """
         if self.gray_img.size > 0 and self.processed_img.size > 0:
             distribution_window = CurvesWindow(self.gray_img, self.processed_img)
             distribution_window.exec_()
@@ -245,6 +300,16 @@ class mainwindow(QtWidgets.QMainWindow):
         handelcomboxchanges3(self)
 
     def handle_radio_buttons(self):
+        """
+        This function is used to handle the logic when radio buttons are clicked.
+
+        It checks if the `graphicsView` has contents. If it does, it checks the state of the radio buttons.
+        If the first radio button is checked, it calls the `display_image` function with the `original_img` and `graphicsView` as arguments.
+        If the second radio button is checked, it calls the `display_image` function with the `gray_img` and `graphicsView` as arguments.
+
+        Returns:
+            None
+        """
         # Check if graphicsView has contents
         if self.graphicsView.scene() and self.graphicsView.scene().items():
             if self.radioButton.isChecked():
@@ -254,7 +319,20 @@ class mainwindow(QtWidgets.QMainWindow):
                 # Display gray image
                 self.display_image(self.gray_img, self.graphicsView)
 
+
     def update_label_text(self, value):
+        """
+        This function is used to update the text of a label based on the value of a slider.
+
+        It first retrieves the sender object that emitted the signal. Then, it uses a dictionary to map slider objects to label objects.
+        It updates the text of the corresponding label with the slider value, with special handling for specific sliders (9, 11, and 13).
+
+        Args:
+            value: The value of the slider.
+
+        Returns:
+            None
+        """
         # Get the sender object that emitted the signal
         sender = self.sender()
 
@@ -288,7 +366,6 @@ class mainwindow(QtWidgets.QMainWindow):
             else:
                 label.setText(str(value))
 
-
     def check_tap(self):
         if self.tabWidget.currentIndex() == 2:
             return 1
@@ -307,6 +384,11 @@ class mainwindow(QtWidgets.QMainWindow):
         self.display_image(img_out, self.graphicsView_4)
 
     def browse_image(self, widget):
+        #     This function is used to browse and load an image file from the user's system.
+
+        # Parameters:
+        # - widget: The widget on which the image is to be loaded.
+
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Images (*.png *.jpg *.bmp *.gif *.jpeg)")
         file_dialog.setFileMode(QFileDialog.ExistingFile)
@@ -347,16 +429,20 @@ class mainwindow(QtWidgets.QMainWindow):
                 elif widget == self.widget_3:
                     self.segmentation_img = self.convert_gry(cv2.imread(selected_file))
                     # Get the dimensions of the image
-                    self.seg_img_height, self.seg_img_width = self.segmentation_img.shape[:2]
-                    self.slider_c.setMaximum(self.seg_img_height*2)
-                    
-                    self.slider_r.setMaximum(self.seg_img_width*2)
-                    
+                    self.seg_img_height, self.seg_img_width = (
+                        self.segmentation_img.shape[:2]
+                    )
+                    self.slider_c.setMaximum(self.seg_img_height * 2)
+
+                    self.slider_r.setMaximum(self.seg_img_width * 2)
+
                     # Calculate the center coordinates of the image
                     self.center_x = self.seg_img_width // 2
                     self.center_y = self.seg_img_height // 2
                     # Define the radius of the circle
-                    self.radius = min(self.seg_img_width, self.seg_img_height) // 4  # Choose a reasonable radius
+                    self.radius = (
+                        min(self.seg_img_width, self.seg_img_height) // 4
+                    )  # Choose a reasonable radius
                     # Generate the coordinates of the circle
                     self.s = np.linspace(0, 2 * np.pi, 400)
                     self.r = self.center_x + self.radius * np.sin(self.s)
@@ -366,6 +452,24 @@ class mainwindow(QtWidgets.QMainWindow):
                     # print(self.r)
 
     def display_image(self, img_data, widget):
+        """
+        This function is used to display an image on a specified widget while maintaining the aspect ratio of the image.
+
+        Parameters:
+        - img_data: The image data to be displayed.
+        - widget: The widget on which the image is to be displayed.
+
+        The function first determines whether the input image is grayscale or color by checking the shape of the `img_data` array.
+        - If the image is grayscale (2 dimensions), a QImage is created with `QImage.Format_Grayscale8`.
+        - If the image is color (3 dimensions), the image is converted to RGB format using `cv2.cvtColor` and a QImage is created with `QImage.Format_RGB888`.
+        - If the image format is not supported, a ValueError is raised.
+
+        The function then calculates the new width and height of the image to maintain the aspect ratio when displayed on the widget. The image is resized accordingly.
+
+        A QGraphicsScene is created on the specified widget, and a QGraphicsPixmapItem containing the image data is added to the scene for display.
+
+        Note: This function assumes the presence of classes and functions such as QImage, QPixmap, QGraphicsScene, and QGraphicsPixmapItem from the PyQt5 library.
+        """
         # Get the size of the widget
         widget_width = widget.width()
         widget_height = widget.height()
@@ -414,6 +518,20 @@ class mainwindow(QtWidgets.QMainWindow):
         scene.addItem(pixmap_item)
 
     def convert_gry(self, img_data):
+        """
+        This function converts a color image to grayscale using the luminosity method.
+
+        Parameters:
+        - img_data: The image data to be converted.
+
+        The function first checks if the input image is a color image by checking the shape of the `img_data` array.
+        If it is a color image, the function creates a grayscale image with the same dimensions as the input image.
+        Then, it iterates over each pixel of the image and calculates the grayscale value using the luminosity method:
+        `gray_image[i, j] = int(R * 0.299 + G * 0.587 + B * 0.114)`, where `R`, `G`, and `B` are the individual pixel values.
+        Finally, the function clips the values of the grayscale image to the range [0, 255] and returns the grayscale image.
+
+        Note: This function assumes that the input image is a numpy array.
+        """
         if len(img_data.shape) == 3:  # Check if it's a color image
             gray_image = np.zeros(
                 (img_data.shape[0], img_data.shape[1]), dtype=np.uint8
@@ -449,6 +567,21 @@ class mainwindow(QtWidgets.QMainWindow):
         )
 
     def convert_array_to_image(self, img_array, original_img_dtype):
+        """
+        This function converts a NumPy array representing an image to a QImage format compatible with PyQt.
+
+        Parameters:
+        - img_array: The NumPy array representing the image.
+        - original_img_dtype: The original data type of the image.
+
+        The function performs the following steps:
+        1. Converts the image array from BGR format to RGB format using `cv2.cvtColor`.
+        2. Gets the dimensions of the image array.
+        3. Converts the data type of the image array to match the original image data type.
+        4. Creates a QImage object using the image array data, width, height, strides, and format.
+
+        Note: This function assumes that the input image array is in BGR format and that the original image data type is known.
+        """
         # Convert the array to an image format compatible with PyQt
         img_rgb = cv2.cvtColor(
             img_array, cv2.COLOR_BGR2RGB
@@ -617,24 +750,28 @@ class mainwindow(QtWidgets.QMainWindow):
             self.center_x = int(event.xdata)  # Store x and y as attributes of the class
             self.center_y = int(event.ydata)
             print("Mouse coordinates (x, y):", self.center_x, self.center_y)
-            radius = min(self.seg_img_width, self.seg_img_height) // 4  # Choose a reasonable radius
+            radius = (
+                min(self.seg_img_width, self.seg_img_height) // 4
+            )  # Choose a reasonable radius
             s = np.linspace(0, 2 * np.pi, 400)
-            self.r = self.center_x + radius * np.sin(s)  # Use self.center_x and self.center_y here
+            self.r = self.center_x + radius * np.sin(
+                s
+            )  # Use self.center_x and self.center_y here
             self.c = self.center_y + radius * np.cos(s)
             # self.init_coords = np.column_stack((self.r, self.c))
-            self.init_coords =np.array([self.r, self.c]).T
+            self.init_coords = np.array([self.r, self.c]).T
             print("Initial contour coordinates:", self.init_coords)
             self.horizontalSlider_9.setValue(1)
             self.horizontalSlider_10.setValue(10)
             self.horizontalSlider_11.setValue(1)
             self.horizontalSlider_12.setValue(500)
             self.horizontalSlider_13.setValue(10)
-            self.slider_c.setValue(int(self.seg_img_height/2))
-            self.slider_r.setValue(int(self.seg_img_width/2))
+            self.slider_c.setValue(int(self.seg_img_height / 2))
+            self.slider_r.setValue(int(self.seg_img_width / 2))
             self.plot_contour()
 
     def plot_image(self):
-        layout=QVBoxLayout()
+        layout = QVBoxLayout()
         self.widget_3.setLayout(layout)
         self.widget_3.layout().addWidget(self.canvas)
         ax = self.canvas.figure.add_subplot(111)
@@ -643,29 +780,40 @@ class mainwindow(QtWidgets.QMainWindow):
         ax.set_xticks([]), ax.set_yticks([])
         ax.axis([0, self.segmentation_img.shape[1], self.segmentation_img.shape[0], 0])
         self.canvas.draw()
-    
+
     def plot_contour(self):
         r_value = self.slider_r.value()
         c_value = self.slider_c.value()
-        alpha=self.horizontalSlider_9.value()/10000
-        beta=self.horizontalSlider_10.value()
-        gamma=self.horizontalSlider_11.value()/1000
-        num_of_iterations=self.horizontalSlider_12.value()
-        sigma=self.horizontalSlider_13.value()/100
-        self.init_coords[:, 0] = self.center_x + r_value * np.sin(np.linspace(0, 2 * np.pi, 400))
-        self.init_coords[:, 1] = self.center_y + c_value * np.cos(np.linspace(0, 2 * np.pi, 400))
+        alpha = self.horizontalSlider_9.value() / 10000
+        beta = self.horizontalSlider_10.value()
+        gamma = self.horizontalSlider_11.value() / 1000
+        num_of_iterations = self.horizontalSlider_12.value()
+        sigma = self.horizontalSlider_13.value() / 100
+        self.init_coords[:, 0] = self.center_x + r_value * np.sin(
+            np.linspace(0, 2 * np.pi, 400)
+        )
+        self.init_coords[:, 1] = self.center_y + c_value * np.cos(
+            np.linspace(0, 2 * np.pi, 400)
+        )
 
-        snake = active_contour(gaussian(self.segmentation_img, 3, preserve_range=False), self.init_coords,
-                                    alpha=alpha, beta=beta,
-                                    w_line=0, w_edge=1, gamma=gamma,
-                                    max_px_move=1.0,
-                                    max_num_iter=num_of_iterations, convergence=sigma)
+        snake = active_contour(
+            gaussian(self.segmentation_img, 3, preserve_range=False),
+            self.init_coords,
+            alpha=alpha,
+            beta=beta,
+            w_line=0,
+            w_edge=1,
+            gamma=gamma,
+            max_px_move=1.0,
+            max_num_iter=num_of_iterations,
+            convergence=sigma,
+        )
 
         ax = self.canvas.figure.add_subplot(111)
         ax.clear()
         ax.imshow(self.segmentation_img, cmap=plt.cm.gray)
-        ax.plot(self.init_coords[:, 1], self.init_coords[:, 0], '--r', lw=3)
-        ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
+        ax.plot(self.init_coords[:, 1], self.init_coords[:, 0], "--r", lw=3)
+        ax.plot(snake[:, 1], snake[:, 0], "-b", lw=3)
         ax.set_xticks([]), ax.set_yticks([])
         ax.axis([0, self.segmentation_img.shape[1], self.segmentation_img.shape[0], 0])
         self.canvas.draw()
