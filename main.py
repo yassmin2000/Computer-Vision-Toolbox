@@ -66,6 +66,7 @@ class mainwindow(QtWidgets.QMainWindow):
         self.pushButton.clicked.connect(self.apply_button_clicked)
         self.pushButton_3.clicked.connect(self.clear)
         self.pushButton_4.clicked.connect(self.clear)
+        self.pushButton_7.clicked.connect(self.clear)
         self.pushButton_5.clicked.connect(self.show_histogram)
         self.horizontalSlider.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_2.valueChanged.connect(self.update_label_text)
@@ -693,6 +694,10 @@ class mainwindow(QtWidgets.QMainWindow):
             self.c = np.zeros_like(self.s)
             self.init_coords = np.array([self.r, self.c]).T
             self.canvas = FigureCanvas(plt.figure())
+        elif self.tabWidget.currentIndex() == 3:
+            self.transformed_img = []
+            self.graphicsView_10.scene().clear()
+            self.graphicsView_11.scene().clear()
         else:
             self.original_img = []
             self.gray_img = np.array([], dtype=np.uint8)
