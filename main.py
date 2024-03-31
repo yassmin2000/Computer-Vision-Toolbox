@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 from ui_handler import handlecomboBoxChange, handlecomboBoxChange2, handelcomboxchanges3
 from noise import apply_uniform_noise, apply_gaussian_noise, apply_salt_and_pepper_noise
 from filters import apply_average_filter, apply_gaussian_filter, apply_median_filter
+from skimage.filters import gaussian
 from edge_detection import (
     sobel_operator,
     roberts_operator,
@@ -17,18 +18,20 @@ from edge_detection import (
     canny_operator,
 )
 from thresholding import global_thresholding, local_thresholding
-from histogram import calculate_histogram, histogram_to_qimage, display_qimage
+from histogram import calculate_histogram
 from custom import HistogramWidget  # Import HistogramWidget class
 from popup import RGBHistogramWindow
 from popup2 import CurvesWindow
 import lh_filters_hybrid
 import equalization_and_normalization
+from active_contour import active_contour
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import cv2
 from circle import hough_circles
 from lines import hough_line_detection
-import matplotlib as plt
 from elipse import edge_ellipse_detector
 
 
@@ -44,7 +47,19 @@ class mainwindow(QtWidgets.QMainWindow):
         self.hybrid_input_1 = []
         self.hybrid_input_2 = []
         self.transformed_img = []
-
+        self.segmentation_img = []
+        self.seg_img_height =0
+        self.seg_img_width =0
+        self.center_x = 0
+        self.center_y = 0
+        self.radius = 0
+        self.s=np.linspace(0, 2 * np.pi, 400)
+        self.r = np.zeros_like(self.s)
+        self.c = np.zeros_like(self.s)
+        self.init_coords = np.array([self.r, self.c]).T
+        self.canvas = FigureCanvas(plt.figure()) 
+        
+        self.canvas.mpl_connect('button_press_event', self.on_mouse_press)
         self.filters_combo.currentIndexChanged.connect(self.handlecomboBoxChange)
         self.comboBox_2.currentIndexChanged.connect(self.handlecomboBoxChange2)
         self.types.currentIndexChanged.connect(self.handelcomboxchanges3)
@@ -67,6 +82,9 @@ class mainwindow(QtWidgets.QMainWindow):
         )
         self.graphicsView_10.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.graphicsView_10
+        )
+        self.widget_3.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.widget_3
         )
         self.radioButton.toggled.connect(self.handle_radio_buttons)
         self.radioButton_2.toggled.connect(self.handle_radio_buttons)
@@ -92,6 +110,47 @@ class mainwindow(QtWidgets.QMainWindow):
         self.label_38.setVisible(False)
         self.label_39.setVisible(False)
         self.label_40.setVisible(False)
+        self.slider_r.setMinimum(0)
+        self.slider_r.valueChanged.connect(self.plot_contour)
+        self.slider_c.setMinimum(0)
+        self.slider_c.valueChanged.connect(self.plot_contour)
+        self.pushButton_8.clicked.connect(self.plot_contour)
+        self.pushButton_9.clicked.connect(self.clear)
+        self.horizontalSlider_9.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_10.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_11.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_12.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_13.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_9.setMinimum(0)
+        
+        self.horizontalSlider_9.setMaximum(100)  # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_9.setSingleStep(1)  # Step size set to 0.01 scaled to integer
+
+        # Adjustments for beta (self.horizontalSlider_10)
+        self.horizontalSlider_10.setMinimum(0)
+          # Starting value set to 0.1 scaled to integer
+        self.horizontalSlider_10.setMaximum(100)  # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_10.setSingleStep(1)  # Step size set to 0.1 scaled to integer
+
+        # Adjustments for gamma (self.horizontalSlider_11)
+        self.horizontalSlider_11.setMinimum(0)
+          # Starting value set to 0.01 scaled to integer
+        self.horizontalSlider_11.setMaximum(100)  # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_11.setSingleStep(1)  # Step size set to 0.01 scaled to integer
+
+        # Adjustments for max_num_iter (self.horizontalSlider_12)
+        self.horizontalSlider_12.setMinimum(500)  # Minimum value set to 500
+          # Starting value set to 2500
+        self.horizontalSlider_12.setMaximum(10000)  # Maximum value set to 10000
+        self.horizontalSlider_12.setSingleStep(500)  # Step size set to 500
+
+        # Adjustments for convergence (self.horizontalSlider_13)
+        self.horizontalSlider_13.setMinimum(0)
+        self.horizontalSlider_13.setValue(10)  # Starting value set to 0.1 scaled to integer
+          # Maximum value set to 1 scaled to integer
+        self.horizontalSlider_13.setSingleStep(1)  # Step size set to 0.01 scaled to integer
+
+
 
         self.comboBox_2.clear()
         new_options = ["Uniform", "Gaussian", "Salt & pepper"]
@@ -218,7 +277,16 @@ class mainwindow(QtWidgets.QMainWindow):
         # Update the text of the corresponding label with the slider value
         label = slider_label_map.get(sender)
         if label:
-            label.setText(str(value))
+            # Special handling for sliders 9, 11, and 13
+            if sender == self.horizontalSlider_9:
+                label.setText(str(value / 10000))
+            elif sender == self.horizontalSlider_11:
+                label.setText(str(value / 1000))
+            elif sender == self.horizontalSlider_13:
+                label.setText(str(value / 100))
+            else:
+                label.setText(str(value))
+
 
     def check_tap(self):
         if self.tabWidget.currentIndex() == 2:
@@ -275,6 +343,26 @@ class mainwindow(QtWidgets.QMainWindow):
                     self.transformed_img = cv2.imread(selected_file)
                     self.transformed_img = self.convert_gry(self.transformed_img)
                     self.display_image(self.transformed_img, widget)
+                elif widget == self.widget_3:
+                    self.segmentation_img = self.convert_gry(cv2.imread(selected_file))
+                    # Get the dimensions of the image
+                    self.seg_img_height, self.seg_img_width = self.segmentation_img.shape[:2]
+                    self.slider_c.setMaximum(self.seg_img_height*2)
+                    
+                    self.slider_r.setMaximum(self.seg_img_width*2)
+                    
+                    # Calculate the center coordinates of the image
+                    self.center_x = self.seg_img_width // 2
+                    self.center_y = self.seg_img_height // 2
+                    # Define the radius of the circle
+                    self.radius = min(self.seg_img_width, self.seg_img_height) // 4  # Choose a reasonable radius
+                    # Generate the coordinates of the circle
+                    self.s = np.linspace(0, 2 * np.pi, 400)
+                    self.r = self.center_x + self.radius * np.sin(self.s)
+                    self.c = self.center_y + self.radius * np.cos(self.s)
+                    self.init_coords = np.array([self.r, self.c]).T
+                    self.plot_image()
+                    # print(self.r)
 
     def display_image(self, img_data, widget):
         # Get the size of the widget
@@ -523,6 +611,64 @@ class mainwindow(QtWidgets.QMainWindow):
         rgb_histogram_window = RGBHistogramWindow(self.original_img)
         rgb_histogram_window.show_histogram_window(self.original_img)
 
+    def on_mouse_press(self, event):
+        if event.button == 1:  # Left mouse button
+            self.center_x = int(event.xdata)  # Store x and y as attributes of the class
+            self.center_y = int(event.ydata)
+            print("Mouse coordinates (x, y):", self.center_x, self.center_y)
+            radius = min(self.seg_img_width, self.seg_img_height) // 4  # Choose a reasonable radius
+            s = np.linspace(0, 2 * np.pi, 400)
+            self.r = self.center_x + radius * np.sin(s)  # Use self.center_x and self.center_y here
+            self.c = self.center_y + radius * np.cos(s)
+            # self.init_coords = np.column_stack((self.r, self.c))
+            self.init_coords =np.array([self.r, self.c]).T
+            print("Initial contour coordinates:", self.init_coords)
+            self.horizontalSlider_9.setValue(1)
+            self.horizontalSlider_10.setValue(10)
+            self.horizontalSlider_11.setValue(1)
+            self.horizontalSlider_12.setValue(500)
+            self.horizontalSlider_13.setValue(10)
+            self.slider_c.setValue(int(self.seg_img_height/2))
+            self.slider_r.setValue(int(self.seg_img_width/2))
+            self.plot_contour()
+
+    def plot_image(self):
+        layout=QVBoxLayout()
+        self.widget_3.setLayout(layout)
+        self.widget_3.layout().addWidget(self.canvas)
+        ax = self.canvas.figure.add_subplot(111)
+        ax.clear()
+        ax.imshow(self.segmentation_img, cmap=plt.cm.gray)
+        ax.set_xticks([]), ax.set_yticks([])
+        ax.axis([0, self.segmentation_img.shape[1], self.segmentation_img.shape[0], 0])
+        self.canvas.draw()
+    
+    def plot_contour(self):
+        r_value = self.slider_r.value()
+        c_value = self.slider_c.value()
+        alpha=self.horizontalSlider_9.value()/10000
+        beta=self.horizontalSlider_10.value()
+        gamma=self.horizontalSlider_11.value()/1000
+        num_of_iterations=self.horizontalSlider_12.value()
+        sigma=self.horizontalSlider_13.value()/100
+        self.init_coords[:, 0] = self.center_x + r_value * np.sin(np.linspace(0, 2 * np.pi, 400))
+        self.init_coords[:, 1] = self.center_y + c_value * np.cos(np.linspace(0, 2 * np.pi, 400))
+
+        snake = active_contour(gaussian(self.segmentation_img, 3, preserve_range=False), self.init_coords,
+                                    alpha=alpha, beta=beta,
+                                    w_line=0, w_edge=1, gamma=gamma,
+                                    max_px_move=1.0,
+                                    max_num_iter=num_of_iterations, convergence=sigma)
+
+        ax = self.canvas.figure.add_subplot(111)
+        ax.clear()
+        ax.imshow(self.segmentation_img, cmap=plt.cm.gray)
+        ax.plot(self.init_coords[:, 1], self.init_coords[:, 0], '--r', lw=3)
+        ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
+        ax.set_xticks([]), ax.set_yticks([])
+        ax.axis([0, self.segmentation_img.shape[1], self.segmentation_img.shape[0], 0])
+        self.canvas.draw()
+
     def clear(self):
         tap_index = self.check_tap()
         if tap_index:
@@ -532,6 +678,21 @@ class mainwindow(QtWidgets.QMainWindow):
             self.graphicsView_3.scene().clear()
             self.graphicsView_4.scene().clear()
             self.graphicsView_5.scene().clear()
+        elif self.tabWidget.currentIndex() == 4:
+            self.segmentation_img = None
+            # Clear layout of widget_3 (if it contains any widgets)
+            self.clear_layout(self.widget_3.layout())
+            # Reinitialize variables to their initial values
+            self.seg_img_height = 0
+            self.seg_img_width = 0
+            self.center_x = 0
+            self.center_y = 0
+            self.radius = 0
+            self.s = np.linspace(0, 2 * np.pi, 400)
+            self.r = np.zeros_like(self.s)
+            self.c = np.zeros_like(self.s)
+            self.init_coords = np.array([self.r, self.c]).T
+            self.canvas = FigureCanvas(plt.figure())
         else:
             self.original_img = []
             self.gray_img = np.array([], dtype=np.uint8)
@@ -542,7 +703,6 @@ class mainwindow(QtWidgets.QMainWindow):
             self.graphicsView_7.scene().clear()
             self.clear_layout(self.widget.layout())
             if self.filters_combo.currentIndex() != 2:
-
                 self.clear_layout(self.widget_2.layout())
 
     def clear_layout(self, layout):
