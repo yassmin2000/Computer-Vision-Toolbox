@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QMessageBox,
 )
-from ui_handler import handlecomboBoxChange, handlecomboBoxChange2, handelcomboxchanges3
+from ui_handler import handlecomboBoxChange, handlecomboBoxChange2, handelcomboxchanges3 , handlematchingcombo
 from noise import apply_uniform_noise, apply_gaussian_noise, apply_salt_and_pepper_noise
 from filters import apply_average_filter, apply_gaussian_filter, apply_median_filter
 from skimage.filters import gaussian
@@ -47,6 +47,8 @@ class mainwindow(QtWidgets.QMainWindow):
         self.hybrid_input_1 = []
         self.hybrid_input_2 = []
         self.transformed_img = []
+        self.matching_img = []
+        self.template_img = []
         self.segmentation_img = []
         self.seg_img_height = 0
         self.seg_img_width = 0
@@ -67,17 +69,22 @@ class mainwindow(QtWidgets.QMainWindow):
         self.pushButton_3.clicked.connect(self.clear)
         self.pushButton_4.clicked.connect(self.clear)
         self.pushButton_7.clicked.connect(self.clear)
+        self.clear_matching.clicked.connect(self.clear)
         self.pushButton_5.clicked.connect(self.show_histogram)
         self.horizontalSlider.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_2.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_3.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_4.valueChanged.connect(self.update_label_text)
+        self.matching_combo.currentIndexChanged.connect(self.handlematchingcombo)
         self.graphicsView.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.graphicsView
         )
-        self.graphicsView_3.mouseDoubleClickEvent = lambda event: self.browse_image(
-            self.graphicsView_3
-        )
+        self.graphicsView_3.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_3)
+
+        self.graphicsView_8.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_8)
+        self.graphicsView_9.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_9)
+        self.graphicsView_12.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_12)
+
         self.graphicsView_5.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.graphicsView_5
         )
@@ -93,6 +100,12 @@ class mainwindow(QtWidgets.QMainWindow):
         self.horizontalSlider_2.valueChanged.connect(self.thresholding)
         self.horizontalSlider_3.valueChanged.connect(self.thresholding)
         self.horizontalSlider_4.valueChanged.connect(self.thresholding)
+
+
+        
+        self.label_52.setVisible(False)
+        self.graphicsView_12.setVisible(False)
+        
         self.label_3.setVisible(True)
         self.comboBox_2.setVisible(True)
         self.label_14.setVisible(False)
@@ -111,6 +124,7 @@ class mainwindow(QtWidgets.QMainWindow):
         self.label_38.setVisible(False)
         self.label_39.setVisible(False)
         self.label_40.setVisible(False)
+       
         self.slider_r.setMinimum(0)
         self.slider_r.valueChanged.connect(self.plot_contour)
         self.slider_c.setMinimum(0)
@@ -126,6 +140,7 @@ class mainwindow(QtWidgets.QMainWindow):
         self.horizontalSlider_6.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_7.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_8.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_14.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_9.setMinimum(0)
 
         self.horizontalSlider_9.setMaximum(
@@ -179,6 +194,7 @@ class mainwindow(QtWidgets.QMainWindow):
 
         self.pushButton_6.clicked.connect(self.show_distribution_curves)
         self.apply_objdetect_btn.clicked.connect(self.handle_apply_objdetect_btn)
+       
 
     def handle_apply_objdetect_btn(self):
         """
@@ -299,6 +315,9 @@ class mainwindow(QtWidgets.QMainWindow):
     def handelcomboxchanges3(self):
         handelcomboxchanges3(self)
 
+    def handlematchingcombo(self):
+        handlematchingcombo(self)    
+
     def handle_radio_buttons(self):
         """
         This function is used to handle the logic when radio buttons are clicked.
@@ -351,6 +370,7 @@ class mainwindow(QtWidgets.QMainWindow):
             self.horizontalSlider_11: self.label_36,
             self.horizontalSlider_12: self.label_42,
             self.horizontalSlider_13: self.label_44,
+            self.horizontalSlider_14: self.label_53,
         }
 
         # Update the text of the corresponding label with the slider value
@@ -450,6 +470,14 @@ class mainwindow(QtWidgets.QMainWindow):
                     self.init_coords = np.array([self.r, self.c]).T
                     self.plot_image()
                     # print(self.r)
+                elif widget == self.graphicsView_8:
+                    self.matching_img = cv2.imread(selected_file)
+                    self.matching_img = self.convert_gry(self.matching_img)
+                    self.display_image(self.matching_img, widget)   
+                elif widget == self.graphicsView_12:
+                    self.template_img = cv2.imread(selected_file)
+                    self.template_img = self.convert_gry(self.template_img)
+                    self.display_image(self.template_img, widget)
 
     def display_image(self, img_data, widget):
         """
@@ -846,6 +874,15 @@ class mainwindow(QtWidgets.QMainWindow):
             self.transformed_img = []
             self.graphicsView_10.scene().clear()
             self.graphicsView_11.scene().clear()
+
+        elif self.tabWidget.currentIndex() == 5:
+            self.graphicsView_8.scene().clear()
+            self.graphicsView_9.scene().clear()
+            self.graphicsView_12.scene().clear()  
+            self.template_img = []
+            self.matching_img = []
+            self.horizontalSlider_14.setValue(0)  
+    
         else:
             self.original_img = []
             self.gray_img = np.array([], dtype=np.uint8)

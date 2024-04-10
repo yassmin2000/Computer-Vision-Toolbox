@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1168</width>
-    <height>838</height>
+    <height>871</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,11 +15,12 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_5">
-    <item row="0" column="0">
+    <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
       <property name="font">
        <font>
         <pointsize>10</pointsize>
+        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -269,7 +270,7 @@ QComboBox:on { /* shift the text when the popup opens */
 </string>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="filters">
        <attribute name="title">
@@ -312,6 +313,7 @@ QComboBox:on { /* shift the text when the popup opens */
          <widget class="QGroupBox" name="groupBox">
           <property name="font">
            <font>
+            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -750,6 +752,7 @@ font-weight: bold;</string>
             <property name="font">
              <font>
               <pointsize>10</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -773,6 +776,7 @@ font-weight: bold;</string>
             <property name="font">
              <font>
               <pointsize>10</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -798,6 +802,7 @@ font-weight: bold;</string>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -837,6 +842,7 @@ font-weight: bold;</string>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -904,6 +910,7 @@ font-weight: bold;</string>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -974,6 +981,7 @@ font-weight: bold;</string>
             <property name="font">
              <font>
               <pointsize>10</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -992,6 +1000,7 @@ font-weight: bold;</string>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -1104,6 +1113,7 @@ font-weight: bold;</string>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -1201,6 +1211,7 @@ font-weight: bold;</string>
           <property name="font">
            <font>
             <pointsize>18</pointsize>
+            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -1902,6 +1913,134 @@ font-weight: bold;</string>
            <string>Width</string>
           </property>
          </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Image Matching</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <widget class="QLabel" name="label_48">
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Options</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="matching_combo">
+            <item>
+             <property name="text">
+              <string>Harris Operator</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>SIFT</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Normalized Cross Corelation</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Sum Squared Difference</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_26">
+            <item>
+             <widget class="QLabel" name="label_49">
+              <property name="text">
+               <string>Threshold</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="horizontalSlider_14">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_53">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_52">
+            <property name="text">
+             <string>Template</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="graphicsView_12"/>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_14">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clear_matching">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_11">
+          <item>
+           <widget class="QLabel" name="label_50">
+            <property name="text">
+             <string>Input Image </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="graphicsView_8"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_51">
+            <property name="text">
+             <string>Output Image</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="graphicsView_9"/>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
