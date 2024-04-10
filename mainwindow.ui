@@ -2010,6 +2010,13 @@ font-weight: bold;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="applyButton_matching">
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="clear_matching">
             <property name="text">
              <string>Clear</string>
