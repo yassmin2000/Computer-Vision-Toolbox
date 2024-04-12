@@ -276,7 +276,7 @@ QComboBox:on { /* shift the text when the popup opens */
 </string>
     </property>
     <property name="currentIndex">
-     <number>5</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="filters">
      <attribute name="title">
@@ -1924,9 +1924,9 @@ font-weight: bold;</string>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Image Matching</string>
+      <string>Corner Detection</string>
      </attribute>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>11</x>
@@ -1950,30 +1950,6 @@ font-weight: bold;</string>
            <property name="text">
             <string>Options</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="matching_combo">
-           <item>
-            <property name="text">
-             <string>Harris Operator</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>SIFT</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Normalized Cross Corelation</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Sum Squared Difference</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item>
@@ -2027,9 +2003,6 @@ font-weight: bold;</string>
           </widget>
          </item>
          <item>
-          <widget class="QGraphicsView" name="graphicsView_12"/>
-         </item>
-         <item>
           <spacer name="verticalSpacer_14">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -2043,14 +2016,14 @@ font-weight: bold;</string>
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="applyButton_matching">
+          <widget class="QPushButton" name="applyButton_harris">
            <property name="text">
             <string>Apply</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="clear_matching">
+          <widget class="QPushButton" name="clear_harris">
            <property name="text">
             <string>Clear</string>
            </property>
@@ -2068,7 +2041,7 @@ font-weight: bold;</string>
           </widget>
          </item>
          <item>
-          <widget class="QGraphicsView" name="graphicsView_8"/>
+          <widget class="QGraphicsView" name="graphicsView_8_inputharris"/>
          </item>
          <item>
           <widget class="QLabel" name="label_51">
@@ -2078,9 +2051,162 @@ font-weight: bold;</string>
           </widget>
          </item>
          <item>
+          <widget class="QGraphicsView" name="graphicsView_9_outputharris"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_3">
+     <attribute name="title">
+      <string>Image Matching</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>20</y>
+        <width>691</width>
+        <height>731</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_17">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_29">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_13">
+           <item>
+            <widget class="QLabel" name="label_59">
+             <property name="text">
+              <string>Image 1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGraphicsView" name="graphicsView_8"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_15">
+           <item>
+            <widget class="QLabel" name="label_60">
+             <property name="text">
+              <string>Image 2</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGraphicsView" name="graphicsView_12"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="applyButton_matching">
+         <property name="text">
+          <string>Apply</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_16">
+         <item>
+          <widget class="QLabel" name="label_61">
+           <property name="text">
+            <string>Output Image </string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QGraphicsView" name="graphicsView_9"/>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>401</width>
+        <height>731</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_18">
+       <item>
+        <widget class="QLabel" name="label_56">
+         <property name="font">
+          <font>
+           <pointsize>18</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Options</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="matching_combo">
+         <item>
+          <property name="text">
+           <string>SIFT</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Normalized Cross Corelation</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Sum Squared Difference</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_28">
+         <item>
+          <widget class="QLabel" name="label_57">
+           <property name="text">
+            <string>Time :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_58">
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_15">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="clear_matching">
+         <property name="text">
+          <string>Clear</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -2093,7 +2219,7 @@ font-weight: bold;</string>
      <x>0</x>
      <y>0</y>
      <width>1168</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

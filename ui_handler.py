@@ -314,7 +314,7 @@ def handlematchingcombo(self) :
         self.horizontalSlider_14.setVisible(True)
         self.label_53.setVisible(True)
         self.label_52.setVisible(False)
-        self.graphicsView_12.setVisible(False)
+        self.graphicsView_12.setVisible(True)
         
     elif self.matching_combo.currentIndex() in [1, 2, 3]:
         self.label_49.setVisible(False)

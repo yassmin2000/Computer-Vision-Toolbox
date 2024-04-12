@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import (
     QGraphicsPixmapItem,
@@ -17,6 +18,7 @@ from edge_detection import (
     prewitt_operator,
     canny_operator,
 )
+
 from thresholding import global_thresholding, local_thresholding
 from histogram import calculate_histogram
 from custom import HistogramWidget  # Import HistogramWidget class
@@ -33,7 +35,8 @@ import cv2
 from circle import hough_circles
 from lines import hough_line_detection
 from elipse import edge_ellipse_detector
-
+import sift
+import matching
 
 class mainwindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -100,11 +103,8 @@ class mainwindow(QtWidgets.QMainWindow):
         self.horizontalSlider_2.valueChanged.connect(self.thresholding)
         self.horizontalSlider_3.valueChanged.connect(self.thresholding)
         self.horizontalSlider_4.valueChanged.connect(self.thresholding)
-
-
-        
-        self.label_52.setVisible(False)
-        self.graphicsView_12.setVisible(False)
+        self.label_52.setVisible(True)
+        self.graphicsView_12.setVisible(True)
         
         self.label_3.setVisible(True)
         self.comboBox_2.setVisible(True)
@@ -193,6 +193,7 @@ class mainwindow(QtWidgets.QMainWindow):
         self.pushButton_2.clicked.connect(self.hybrid_image)
 
         self.pushButton_6.clicked.connect(self.show_distribution_curves)
+        self.applyButton_matching.clicked.connect(self.apply_matching)
         self.apply_objdetect_btn.clicked.connect(self.handle_apply_objdetect_btn)
        
 
@@ -316,7 +317,8 @@ class mainwindow(QtWidgets.QMainWindow):
         handelcomboxchanges3(self)
 
     def handlematchingcombo(self):
-        handlematchingcombo(self)    
+        handlematchingcombo(self)
+            
 
     def handle_radio_buttons(self):
         """
@@ -470,11 +472,11 @@ class mainwindow(QtWidgets.QMainWindow):
                     self.init_coords = np.array([self.r, self.c]).T
                     self.plot_image()
                     # print(self.r)
-                elif widget == self.graphicsView_8:
+                elif widget == self.graphicsView_12:
                     self.matching_img = cv2.imread(selected_file)
                     self.matching_img = self.convert_gry(self.matching_img)
                     self.display_image(self.matching_img, widget)   
-                elif widget == self.graphicsView_12:
+                elif widget == self.graphicsView_8:
                     self.template_img = cv2.imread(selected_file)
                     self.template_img = self.convert_gry(self.template_img)
                     self.display_image(self.template_img, widget)
@@ -501,7 +503,8 @@ class mainwindow(QtWidgets.QMainWindow):
         # Get the size of the widget
         widget_width = widget.width()
         widget_height = widget.height()
-
+        # if widget_width and widget_height:
+            # img_data=cv2.resize(img_data,(widget_width,widget_height))
         # Check if the image is grayscale or color
         if len(img_data.shape) == 2:  # Grayscale image
             img_height, img_width = img_data.shape
@@ -528,14 +531,14 @@ class mainwindow(QtWidgets.QMainWindow):
         else:
             raise ValueError("Unsupported image format.")
 
-        # Calculate the new width and height to maintain the aspect ratio
-        aspect_ratio = img_width / img_height
-        if aspect_ratio > 1:
-            new_width = widget_width
-            new_height = int(widget_width / aspect_ratio)
-        else:
-            new_height = widget_height
-            new_width = int(widget_height * aspect_ratio)
+        # # Calculate the new width and height to maintain the aspect ratio
+        # aspect_ratio = img_width / img_height
+        # if aspect_ratio > 1:
+        #     new_width = widget_width
+        #     new_height = int(widget_width / aspect_ratio)
+        # else:
+        #     new_height = widget_height
+        #     new_width = int(widget_height * aspect_ratio)
         # Create a QGraphicsScene
         scene = QGraphicsScene(self)
         widget.setScene(scene)
@@ -894,6 +897,141 @@ class mainwindow(QtWidgets.QMainWindow):
             self.clear_layout(self.widget.layout())
             if self.filters_combo.currentIndex() != 2:
                 self.clear_layout(self.widget_2.layout())
+    def apply_matching(self):
+        
+        if self.matching_combo.currentIndex()==0:
+            MIN_MATCH_COUNT = 10
+            # Convert images to grayscale
+            gray1 = self.template_img
+            gray2 = self.matching_img
+
+            # Compute SIFT keypoints and descriptors
+            
+            kp1, des1 = sift.computeKeypointsAndDescriptors(self.template_img, sigma=1.6, num_intervals=3, assumed_blur=0.5, image_border_width=5)
+            kp2, des2 = sift.computeKeypointsAndDescriptors(self.matching_img, sigma=1.6, num_intervals=3, assumed_blur=0.5, image_border_width=5)
+
+            # Initialize and use FLANN
+            FLANN_INDEX_KDTREE = 0
+            index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+            search_params = dict(checks=50)
+            flann = cv2.FlannBasedMatcher(index_params, search_params)
+            matches = flann.knnMatch(des1, des2, k=2)
+
+            # Lowe's ratio test
+            good = []
+            for m, n in matches:
+                if m.distance < 0.7 * n.distance:
+                    good.append(m)
+
+            if len(good) > MIN_MATCH_COUNT:
+                # Create a new image by combining the two input images side by side
+                height = max(self.template_img.shape[0], self.matching_img.shape[0])
+                width = self.template_img.shape[1] + self.matching_img.shape[1]
+                newimg = np.zeros((height, width, 3), np.uint8)
+                # Convert the grayscale image to BGR color format
+                self.template_img = cv2.cvtColor(self.template_img, cv2.COLOR_GRAY2BGR)
+                self.matching_img = cv2.cvtColor(self.matching_img, cv2.COLOR_GRAY2BGR)
+                # Assign the color image to the appropriate region in newimg
+                newimg[:self.template_img.shape[0], :self.template_img.shape[1], :] = self.template_img
+                # newimg[:self.template_img.shape[0], :self.template_img.shape[1], :] = self.template_img
+                newimg[:self.matching_img.shape[0], self.template_img.shape[1]:, :] = self.matching_img
+
+                # Shift keypoints coordinates for the second image
+                for kp in kp2:
+                    kp.pt = (kp.pt[0] + self.template_img.shape[1], kp.pt[1])
+
+                # Draw circles around keypoints on the combined image
+                for kp in kp1:
+                    pt = (int(kp.pt[0]), int(kp.pt[1]))
+                    cv2.circle(newimg, pt, 5, (0, 255, 0), -1)  # Green circle
+                for kp in kp2:
+                    pt = (int(kp.pt[0]), int(kp.pt[1]))
+                    cv2.circle(newimg, pt, 5, (0, 255, 0), -1)  # Green circle
+
+                # Draw lines connecting matched keypoints
+                for m in good:
+                    pt1 = (int(kp1[m.queryIdx].pt[0]), int(kp1[m.queryIdx].pt[1]))
+                    pt2 = (int(kp2[m.trainIdx].pt[0]), int(kp2[m.trainIdx].pt[1]))
+                    cv2.line(newimg, pt1, pt2, (255, 0, 0), 1)  # Blue line
+
+                # Convert the OpenCV image to QPixmap for displaying
+                height, width, channel = newimg.shape
+                bytesPerLine = 3 * width
+                qImg = QImage(newimg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
+                pixmap = QPixmap.fromImage(qImg)
+
+                # Create a QGraphicsScene
+                scene = QGraphicsScene()
+
+                # Create a QGraphicsPixmapItem from the pixmap
+                pixmap_item = QGraphicsPixmapItem(pixmap)
+
+                # Add the pixmap item to the scene
+                scene.addItem(pixmap_item)
+
+                # Set the scene to the QGraphicsView
+                self.graphicsView_9.setScene(scene)
+              
+
+            else:
+                print("Not enough matches are found - %d/%d" % (len(good), MIN_MATCH_COUNT))
+
+        elif self.matching_combo.currentIndex()==1:
+            result=matching.template_matching(self.matching_img, self.template_img)
+            if len(result.shape) == 2:  # Grayscale result
+                height, width = result.shape
+                bytes_per_line = width
+                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+            elif len(result.shape) == 3:  # Color image
+                height, width, channel = result.shape
+                bytes_per_line = 3 * width
+                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_RGB888)
+            else:
+                raise ValueError("Unsupported image shape")
+            
+            # Resize the image
+            qimage = qimage.scaled(self.graphicsView_9.size(), Qt.KeepAspectRatio)
+
+            pixmap = QPixmap.fromImage(qimage)
+            # Create a QGraphicsScene
+            scene = QGraphicsScene()
+
+            # Create a QGraphicsPixmapItem from the pixmap
+            pixmap_item = QGraphicsPixmapItem(pixmap)
+
+            # Add the pixmap item to the scene
+            scene.addItem(pixmap_item)
+
+            # Set the scene to the QGraphicsView
+            self.graphicsView_9.setScene(scene)
+        else:
+            result=matching.SSD(self.matching_img, self.template_img)
+            if len(result.shape) == 2:  # Grayscale result
+                height, width = result.shape
+                bytes_per_line = width
+                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+            elif len(result.shape) == 3:  # Color image
+                height, width, channel = result.shape
+                bytes_per_line = 3 * width
+                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_RGB888)
+            else:
+                raise ValueError("Unsupported image shape")
+            
+            # Resize the image
+            qimage = qimage.scaled(self.graphicsView_9.size(), Qt.KeepAspectRatio)
+
+            pixmap = QPixmap.fromImage(qimage)
+            # Create a QGraphicsScene
+            scene = QGraphicsScene()
+
+            # Create a QGraphicsPixmapItem from the pixmap
+            pixmap_item = QGraphicsPixmapItem(pixmap)
+
+            # Add the pixmap item to the scene
+            scene.addItem(pixmap_item)
+
+            # Set the scene to the QGraphicsView
+            self.graphicsView_9.setScene(scene)
 
     def clear_layout(self, layout):
         while layout.count():
