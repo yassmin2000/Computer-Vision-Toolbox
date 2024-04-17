@@ -308,18 +308,3 @@ def handelcomboxchanges3(self):
         self.label_34.setVisible(False)
         self.label_35.setVisible(False)
    
-def handlematchingcombo(self) :
-    if self.matching_combo.currentIndex() == 0:
-        self.label_49.setVisible(True)
-        self.horizontalSlider_14.setVisible(True)
-        self.label_53.setVisible(True)
-        self.label_52.setVisible(False)
-        self.graphicsView_12.setVisible(True)
-        
-    elif self.matching_combo.currentIndex() in [1, 2, 3]:
-        self.label_49.setVisible(False)
-        self.horizontalSlider_14.setVisible(False)
-        self.label_53.setVisible(False)
-        self.label_52.setVisible(True)
-        self.graphicsView_12.setVisible(True)
-

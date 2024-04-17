@@ -18,23 +18,29 @@ def SSD(img,templ):
         # Draw rectangle around the ROI
         top_left = (roi[0], roi[1])
         bottom_right = (roi[0] + roi[2], roi[1] + roi[3])
+        
+        for x in range(top_left[0], bottom_right[0] + 1):
+            img[top_left[1], x] = [0, 255, 0]  # Green color for top line
+            img[bottom_right[1], x] = [0, 255, 0]  # Green color for bottom line
+
         for y in range(top_left[1], bottom_right[1] + 1):
             img[y, top_left[0]] = [0, 255, 0]  # Green color for left line
             img[y, bottom_right[0]] = [0, 255, 0]  # Green color for right line
 
+        return img
+
         
 
 
-def Normalized_Cross_Correlation( roi, target):   
+def Normalized_Cross_Correlation(roi, target):   
         # Normalised Cross Correlation Equation
         cor=np.sum(roi*target)
         nor = np.sqrt((np.sum(roi**2)))*np.sqrt(np.sum(target**2))
         return cor / nor
 
-def template_matching(img,target):
-        
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        target = cv2.cvtColor(target,cv2.COLOR_RGB2GRAY)
+def template_matching(image,target):
+        img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        target = cv2.cvtColor(target,cv2.COLOR_BGR2GRAY)
         height,width=img.shape
         tar_height,tar_width=target.shape
         (max_Y,max_X)=(0, 0)
@@ -65,13 +71,14 @@ def template_matching(img,target):
 
         # Draw top and bottom lines
         for x in range(top_left_cord[0], bottom_right_cord[0] + 1):
-            img[top_left_cord[1], x] = [0, 255, 0]  # Green color for top line
-            img[bottom_right_cord[1], x] = [0, 255, 0]  # Green color for bottom line
+            image[top_left_cord[1], x] = [0, 255, 0]  # Green color for top line
+            image[bottom_right_cord[1], x] = [0, 255, 0]  # Green color for bottom line
 
         # Draw left and right lines
         for y in range(top_left_cord[1], bottom_right_cord[1] + 1):
-            img[y, top_left_cord[0]] = [0, 255, 0]  # Green color for left line
-            img[y, bottom_right_cord[0]] = [0, 255, 0]  # Green color for right line
+            image[y, top_left_cord[0]] = [0, 255, 0]  # Green color for left line
+            image[y, bottom_right_cord[0]] = [0, 255, 0]  # Green color for right line
+        return image
 
      
         
