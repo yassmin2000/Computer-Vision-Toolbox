@@ -307,4 +307,54 @@ def handelcomboxchanges3(self):
         self.label_33.setVisible(True)
         self.label_34.setVisible(False)
         self.label_35.setVisible(False)
+
+
+def handelcomboxchanges4(self):
+    if self.comboBox_5.currentIndex() == 0:
+        self.label_64.setVisible(True)
+        self.horizontalSlider_15.setVisible(True)
+        self.label_65.setVisible(True)
+        self.horizontalSlider_16.setVisible(True)
+        self.label_73.setVisible(True)
+        self.label_74.setVisible(True)
+    elif self.comboBox_5.currentIndex() == 1:
+        self.label_64.setVisible(False)
+        self.horizontalSlider_15.setVisible(False)
+        self.label_73.setVisible(False)
+        self.label_65.setVisible(False)
+        self.horizontalSlider_16.setVisible(False)
+        self.label_74.setVisible(False)
+    elif self.comboBox_5.currentIndex() == 2:
+        self.label_64.setVisible(True)
+        self.label_65.setText(" Y")
+        self.label_64.setText(" X")
+
+        self.horizontalSlider_15.setVisible(True)
+        self.label_73.setVisible(True)
+        self.label_65.setVisible(True)
+        self.horizontalSlider_16.setVisible(True)
+        self.label_74.setVisible(True)
+    elif self.comboBox_5.currentIndex() == 3:
+        self.label_64.setVisible(True)
+        self.label_64.setText("number of clusters ")
+        self.horizontalSlider_15.setVisible(True)
+        self.label_73.setVisible(True)
+        self.label_65.setVisible(True)
+        self.label_65.setText("initial_clusters_number ")
+
+        self.horizontalSlider_16.setVisible(True)
+        self.label_74.setVisible(True)
+
+def handelcomboxchanges5(self):
+    if self.comboBox_6.currentIndex() == 0:
+        self.comboBox_7.setVisible(True)
+
+       
+
+    elif self.comboBox_6.currentIndex() == 1:
+        self.comboBox_7.setVisible(True)
+        
+    elif self.comboBox_6.currentIndex() == 2:
+        self.comboBox_7.setVisible(True)
+        
    

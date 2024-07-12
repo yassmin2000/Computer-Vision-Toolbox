@@ -1,3 +1,8 @@
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QMouseEvent
+import cv2 as cv
+import PIL.Image
+
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
@@ -8,7 +13,13 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QMessageBox,
 )
-from ui_handler import handlecomboBoxChange, handlecomboBoxChange2, handelcomboxchanges3
+from ui_handler import (
+    handlecomboBoxChange,
+    handlecomboBoxChange2,
+    handelcomboxchanges3,
+    handelcomboxchanges4,
+    handelcomboxchanges5,
+)
 from noise import apply_uniform_noise, apply_gaussian_noise, apply_salt_and_pepper_noise
 from filters import apply_average_filter, apply_gaussian_filter, apply_median_filter
 from skimage.filters import gaussian
@@ -18,7 +29,9 @@ from edge_detection import (
     prewitt_operator,
     canny_operator,
 )
-
+from face_detection import detect_faces
+import agg
+from segmentaion import kmeans, mean_shift_method, region_growing, highlight_region
 from thresholding import global_thresholding, local_thresholding
 from histogram import calculate_histogram
 from custom import HistogramWidget  # Import HistogramWidget class
@@ -37,7 +50,13 @@ from lines import hough_line_detection
 from elipse import edge_ellipse_detector
 import sift
 import matching
-from Harris import harris_operator , lambda_minus
+from Harris import harris_operator, lambda_minus
+
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QApplication
+import sys
+import thresholding_methods
+
 
 class mainwindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -55,6 +74,9 @@ class mainwindow(QtWidgets.QMainWindow):
         self.matching_img = []
         self.template_img = []
         self.segmentation_img = []
+        self.seg_img = []
+        self.thresholding_img = []
+        self.recog_img = []
         self.seg_img_height = 0
         self.seg_img_width = 0
         self.center_x = 0
@@ -65,11 +87,16 @@ class mainwindow(QtWidgets.QMainWindow):
         self.c = np.zeros_like(self.s)
         self.init_coords = np.array([self.r, self.c]).T
         self.canvas = FigureCanvas(plt.figure())
+        self.horizontalSlider_15.setRange(0, 1000)
+        self.horizontalSlider_16.setRange(0, 1000)
 
         self.canvas.mpl_connect("button_press_event", self.on_mouse_press)
         self.filters_combo.currentIndexChanged.connect(self.handlecomboBoxChange)
         self.comboBox_2.currentIndexChanged.connect(self.handlecomboBoxChange2)
         self.types.currentIndexChanged.connect(self.handelcomboxchanges3)
+        self.comboBox_5.currentIndexChanged.connect(self.handelcomboxchanges4)
+        self.comboBox_6.currentIndexChanged.connect(self.handelcomboxchanges5)
+
         self.pushButton.clicked.connect(self.apply_button_clicked)
         self.pushButton_3.clicked.connect(self.clear)
         self.pushButton_4.clicked.connect(self.clear)
@@ -84,14 +111,35 @@ class mainwindow(QtWidgets.QMainWindow):
         self.graphicsView.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.graphicsView
         )
-        self.graphicsView_3.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_3)
+        self.graphicsView_3.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_3
+        )
 
-        self.graphicsView_8.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_8)
-        self.graphicsView_9.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_9)
-        self.graphicsView_12.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_12)
-        self.graphicsView_8_inputharris.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_8_inputharris)
-        self.graphicsView_9_outputharris.mouseDoubleClickEvent = lambda event: self.browse_image( self.graphicsView_9_outputharris)
-        
+        self.graphicsView_8.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_8
+        )
+        self.graphicsView_9.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_9
+        )
+        self.graphicsView_12.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_12
+        )
+        self.graphicsView_13.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_13
+        )
+        self.graphicsView_15.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_15
+        )
+        self.graphicsView_17.mouseDoubleClickEvent = lambda event: self.browse_image(
+            self.graphicsView_17
+        )
+        self.graphicsView_8_inputharris.mouseDoubleClickEvent = (
+            lambda event: self.browse_image(self.graphicsView_8_inputharris)
+        )
+        self.graphicsView_9_outputharris.mouseDoubleClickEvent = (
+            lambda event: self.browse_image(self.graphicsView_9_outputharris)
+        )
+
         self.graphicsView_5.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.graphicsView_5
         )
@@ -101,15 +149,19 @@ class mainwindow(QtWidgets.QMainWindow):
         self.widget_3.mouseDoubleClickEvent = lambda event: self.browse_image(
             self.widget_3
         )
+
+        # self.graphicsView_14.mousePressEvent = lambda event: self.mousePressEvent(
+        #     self.graphicsView_14
+        # )
         self.radioButton.toggled.connect(self.handle_radio_buttons)
         self.radioButton_2.toggled.connect(self.handle_radio_buttons)
         self.horizontalSlider.valueChanged.connect(self.thresholding)
         self.horizontalSlider_2.valueChanged.connect(self.thresholding)
         self.horizontalSlider_3.valueChanged.connect(self.thresholding)
         self.horizontalSlider_4.valueChanged.connect(self.thresholding)
-    
+
         # self.graphicsView_12.setVisible(True)
-        
+
         self.label_3.setVisible(True)
         self.comboBox_2.setVisible(True)
         self.label_14.setVisible(False)
@@ -128,7 +180,14 @@ class mainwindow(QtWidgets.QMainWindow):
         self.label_38.setVisible(False)
         self.label_39.setVisible(False)
         self.label_40.setVisible(False)
-       
+        self.label_64.setVisible(True)
+        self.horizontalSlider_15.setVisible(True)
+        self.label_65.setVisible(True)
+        self.horizontalSlider_16.setVisible(True)
+        self.label_73.setVisible(True)
+        self.label_74.setVisible(True)
+        self.comboBox_7.setVisible(True)
+
         self.slider_r.setMinimum(0)
         self.slider_r.valueChanged.connect(self.plot_contour)
         self.slider_c.setMinimum(0)
@@ -144,6 +203,10 @@ class mainwindow(QtWidgets.QMainWindow):
         self.horizontalSlider_6.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_7.valueChanged.connect(self.update_label_text)
         self.horizontalSlider_8.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_15.valueChanged.connect(self.update_label_text)
+        self.horizontalSlider_16.valueChanged.connect(self.update_label_text)
+        
+
         self.horizontalSlider_9.setMinimum(0)
 
         self.horizontalSlider_9.setMaximum(
@@ -199,19 +262,25 @@ class mainwindow(QtWidgets.QMainWindow):
         self.applyButton_matching.clicked.connect(self.apply_matching)
         self.apply_objdetect_btn.clicked.connect(self.handle_apply_objdetect_btn)
         self.applyButton_harris.clicked.connect(self.handle_applyButton_harris)
+        self.seg_apply.clicked.connect(self.handle_segmentation)
         self.horizontalSlider_14.valueChanged.connect(self.update_label_text)
+        self.pushButton_12.clicked.connect(self.thresholding_modes)
+        self.pushButton_13.clicked.connect(self.clear)
+        self.pushButton_11.clicked.connect(self.clear)
+        self.pushButton_10.clicked.connect(self.handle_detecting)
+        self.pushButton_14.clicked.connect(self.clear)
 
     def handle_applyButton_harris(self):
-    
+
         img = self.harris_input
         threshold = self.horizontalSlider_14.value()
-        result_harris , time_harris = harris_operator(img,3,0.04,threshold)
-        result_lambda , time_lambda = lambda_minus(img,3,80)
+        result_harris, time_harris = harris_operator(img, 3, 0.04, threshold)
+        result_lambda, time_lambda = lambda_minus(img, 3, 80)
         print(len(result_harris.shape))
         self.label_55.setText(str(time_harris))
         self.label_63.setText(str(time_lambda))
 
-        self.display_image(result_harris, self.graphicsView_9_outputharris)    
+        self.display_image(result_harris, self.graphicsView_9_outputharris)
 
     def handle_apply_objdetect_btn(self):
         """
@@ -293,7 +362,7 @@ class mainwindow(QtWidgets.QMainWindow):
         elif self.types.currentIndex() == 3:
             min_raduis = self.horizontalSlider_5.value()
             max_raduis = self.horizontalSlider_6.value()
-            
+
             circle_color = "Red"
             edges = canny_operator(
                 self.original_img, low_threshold=50, high_threshold=100
@@ -302,8 +371,53 @@ class mainwindow(QtWidgets.QMainWindow):
                 circle_color, edges, min_raduis, max_raduis, 1, 100, 0.4, 20, True
             )
             self.display_image(output, self.graphicsView_11)
+    def handle_detecting(self):
+        img = self.recog_img
+        output_img = detect_faces(img)
+        # Display the output
+        self.display_image(output_img, self.graphicsView_17)
+    def handle_segmentation(self):
+        img = self.seg_img
+        height, width = img.shape[:2]  # Get the dimensions of the image
 
-   
+        if self.comboBox_5.currentIndex() == 0:
+            k = self.horizontalSlider_16.value()
+            max_iters = self.horizontalSlider_15.value()
+            output_img = kmeans(img, k, max_iters)
+            self.display_image(output_img, self.graphicsView_14)
+        elif self.comboBox_5.currentIndex() == 1:
+            # num_of_iteration = 1
+            output_img = mean_shift_method(img)
+
+            output_img_pil = PIL.Image.fromarray(output_img)
+            output_img_np = np.asarray(output_img_pil)
+
+            self.display_image(output_img_np, self.graphicsView_14)
+        elif self.comboBox_5.currentIndex() == 2:
+
+            self.horizontalSlider_15.setMaximum(width - 1)
+            self.horizontalSlider_16.setMaximum(height - 1)
+            x = self.horizontalSlider_15.value()
+            y = self.horizontalSlider_16.value()
+            seed = (x, y)
+            # Call the modified region_growing function
+            output_img = region_growing(img, seed)
+            highlighted_img = highlight_region(img, output_img)
+            # Convert the image to an 8-bit unsigned integer image if it's a binary image
+            if output_img.dtype == np.bool_:
+                output_img = output_img.astype(np.uint8) * 255
+            self.display_image(highlighted_img, self.graphicsView_14)
+
+        elif self.comboBox_5.currentIndex() == 3:
+
+            K_agg = self.horizontalSlider_15.value()
+            nump_int = self.horizontalSlider_16.value()
+            # Before
+            cluster, centers = agg.apply_agglomerative_clustering(img, K_agg, nump_int)
+            output_img = agg.get_segmentated_image(img, cluster, centers)
+            output_img_pil = PIL.Image.fromarray(output_img)
+            output_img_np = np.asarray(output_img_pil)
+            self.display_image(output_img_np, self.graphicsView_14)
 
     def show_distribution_curves(self):
         """
@@ -332,8 +446,11 @@ class mainwindow(QtWidgets.QMainWindow):
     def handelcomboxchanges3(self):
         handelcomboxchanges3(self)
 
-    
-            
+    def handelcomboxchanges4(self):
+        handelcomboxchanges4(self)
+
+    def handelcomboxchanges5(self):
+        handelcomboxchanges5(self)
 
     def handle_radio_buttons(self):
         """
@@ -354,7 +471,6 @@ class mainwindow(QtWidgets.QMainWindow):
             elif self.radioButton_2.isChecked():
                 # Display gray image
                 self.display_image(self.gray_img, self.graphicsView)
-
 
     def update_label_text(self, value):
         """
@@ -388,6 +504,8 @@ class mainwindow(QtWidgets.QMainWindow):
             self.horizontalSlider_12: self.label_42,
             self.horizontalSlider_13: self.label_44,
             self.horizontalSlider_14: self.label_53,
+            self.horizontalSlider_15: self.label_73,
+            self.horizontalSlider_16: self.label_74,
         }
 
         # Update the text of the corresponding label with the slider value
@@ -401,7 +519,7 @@ class mainwindow(QtWidgets.QMainWindow):
             elif sender == self.horizontalSlider_13:
                 label.setText(str(value / 100))
             elif sender == self.horizontalSlider_14:
-                label.setText(str(value ))    
+                label.setText(str(value))
             else:
                 label.setText(str(value))
 
@@ -490,19 +608,27 @@ class mainwindow(QtWidgets.QMainWindow):
                     self.plot_image()
                     # print(self.r)
                 elif widget == self.graphicsView_8:
-                    if self.matching_combo.currentIndex() == 1 or self.matching_combo.currentIndex() == 2:
+                    if (
+                        self.matching_combo.currentIndex() == 1
+                        or self.matching_combo.currentIndex() == 2
+                    ):
                         self.matching_img = cv2.imread(selected_file)
                         # self.matching_img = cv2.cvtColor(self.matching_img, cv2.COLOR_BGR2RGB)
-                        self.display_image(self.matching_img, widget)   
+                        self.display_image(self.matching_img, widget)
                     else:
                         self.matching_img = cv2.imread(selected_file)
                         self.matching_img = self.convert_gry(self.matching_img)
-                        self.display_image(self.matching_img, widget)  
+                        self.display_image(self.matching_img, widget)
                 elif widget == self.graphicsView_12:
-                    if self.matching_combo.currentIndex() == 1 or self.matching_combo.currentIndex() == 2:
+                    if (
+                        self.matching_combo.currentIndex() == 1
+                        or self.matching_combo.currentIndex() == 2
+                    ):
                         self.template_img = cv2.imread(selected_file)
-                        # self.template_img = cv2.cvtColor(self.template_img, cv2.COLOR_BGR2RGB)
-                        self.display_image(self.template_img, widget)   
+                        self.template_img = cv2.cvtColor(
+                            self.template_img, cv2.COLOR_BGR2RGB
+                        )
+                        self.display_image(self.template_img, widget)
                     else:
                         self.template_img = cv2.imread(selected_file)
                         self.template_img = self.convert_gry(self.template_img)
@@ -510,7 +636,20 @@ class mainwindow(QtWidgets.QMainWindow):
                 elif widget == self.graphicsView_8_inputharris:
                     self.harris_input = cv2.imread(selected_file)
                     self.harris_input = self.convert_gry(self.harris_input)
-                    self.display_image(self.harris_input, widget)    
+                    self.display_image(self.harris_input, widget)
+                elif widget == self.graphicsView_13:
+                    self.seg_img = cv2.imread(selected_file)
+                    # self.seg_img = self.convert_gry(self.seg_img)
+                    self.display_image(self.seg_img, widget)
+
+                elif widget == self.graphicsView_15:
+                    self.thresholding_img = cv2.imread(selected_file)
+                    self.thresholding_img = self.convert_gry(self.thresholding_img)
+                    self.display_image(self.thresholding_img, widget)
+                elif widget == self.graphicsView_17:
+                    self.recog_img = cv2.imread(selected_file)
+                    # self.recog_img = cv2.cvtColor(self.recog_img, cv2.COLOR_BGR2RGB)
+                    self.display_image(self.recog_img, widget)
 
     def display_image(self, img_data, widget):
         """
@@ -535,7 +674,7 @@ class mainwindow(QtWidgets.QMainWindow):
         widget_width = widget.width()
         widget_height = widget.height()
         if widget_width and widget_height:
-            img_data=cv2.resize(img_data,(widget_width,widget_height))
+            img_data = cv2.resize(img_data, (widget_width, widget_height))
         # Check if the image is grayscale or color
         if len(img_data.shape) == 2:  # Grayscale image
             img_height, img_width = img_data.shape
@@ -578,6 +717,40 @@ class mainwindow(QtWidgets.QMainWindow):
         # Create a QGraphicsPixmapItem and add it to the scene
         pixmap_item = QGraphicsPixmapItem(pixmap)
         scene.addItem(pixmap_item)
+
+    import numpy as np
+    from skimage.io import imread, imshow
+    import matplotlib.pyplot as plt
+
+    def rgb_to_luv_man(self, image):
+
+        R = image[..., 0] / 255.0
+        G = image[..., 1] / 255.0
+        B = image[..., 2] / 255.0
+
+        X = (0.412453 * R) + (0.35758 * G) + (0.180423 * B)
+        Y = (0.212671 * R) + (0.715160 * G) + (0.072169 * B)
+        Z = (0.019334 * R) + (0.119193 * G) + (0.950227 * B)
+
+        L = np.zeros_like(Y)
+        L[Y > 0.008856] = 116 * ((Y[Y > 0.008856]) ** (1 / 3)) - 16
+        L[Y <= 0.008856] = (903.3) * Y[Y <= 0.008856]
+
+        u_n = 0.19793943
+        v_n = 0.46831096
+        denom = X + 15 * Y + 3 * Z
+        u_m = 4 * X / denom
+        v_m = 9 * Y / denom
+
+        u = 13 * L * (u_m - u_n)
+        v = 13 * L * (v_m - v_n)
+
+        luv_image = np.zeros_like(image)
+        luv_image[..., 0] = L
+        luv_image[..., 1] = u
+        luv_image[..., 2] = v
+
+        return luv_image
 
     def convert_gry(self, img_data):
         """
@@ -880,6 +1053,42 @@ class mainwindow(QtWidgets.QMainWindow):
         ax.axis([0, self.segmentation_img.shape[1], self.segmentation_img.shape[0], 0])
         self.canvas.draw()
 
+    def thresholding_modes(self):
+        if self.comboBox_7.currentIndex() == 0:
+            threshold_mode = "global"
+            if self.comboBox_6.currentIndex() == 0:  ##optimal
+                threshold = thresholding_methods.optimal_thresholding(
+                    self.thresholding_img, threshold_mode
+                )
+                final_image = global_thresholding(self.thresholding_img, threshold)
+            elif self.comboBox_6.currentIndex() == 1:  ##otsu
+                threshold = thresholding_methods.otsu_threshold(self.thresholding_img)
+                final_image = global_thresholding(self.thresholding_img, threshold)
+            else:
+                # gray = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2GRAY)
+                # final_image = spectral_threshold(gray)
+                final_image = thresholding_methods.spectral_threshold(
+                    self.thresholding_img
+                )
+        else:
+            threshold_mode = "local"
+            if self.comboBox_6.currentIndex() == 0:
+                threshold_type = 0
+                final_image = thresholding_methods.local_thresholding(
+                    self.thresholding_img, threshold_mode, threshold_type
+                )
+            elif self.comboBox_6.currentIndex() == 1:  ##otsu
+                threshold_type = 1
+                final_image = thresholding_methods.local_thresholding(
+                    self.thresholding_img, threshold_mode, threshold_type
+                )
+            else:
+                threshold_type = 2
+                final_image = thresholding_methods.local_thresholding(
+                    self.thresholding_img, threshold_mode, threshold_type
+                )
+        self.display_image(final_image, self.graphicsView_16)
+
     def clear(self):
         tap_index = self.check_tap()
         if tap_index:
@@ -913,10 +1122,28 @@ class mainwindow(QtWidgets.QMainWindow):
             self.graphicsView_8_inputharris.scene().clear()
             self.graphicsView_9_outputharris.scene().clear()
             self.harris_input = []
-            self.horizontalSlider_14.setValue(0) 
+            self.horizontalSlider_14.setValue(0)
             self.label_55.setText(str(0))
             self.label_63.setText(str(0))
-    
+
+        elif self.tabWidget.currentIndex() == 7:
+            self.seg_img = []
+            self.graphicsView_13.scene().clear()
+            self.graphicsView_14.scene().clear()
+            self.horizontalSlider_15.setValue(0)
+            self.horizontalSlider_16.setValue(0)
+            self.label_73.setText(str(0))
+            self.label_74.setText(str(0))
+
+        elif self.tabWidget.currentIndex() == 8:
+            self.graphicsView_15.scene().clear()
+            self.graphicsView_16.scene().clear()
+            self.thresholding_img = []
+        elif self.tabWidget.currentIndex() == 9:
+            self.graphicsView_17.scene().clear()
+            self.graphicsView_18.scene().clear()
+            
+
         else:
             self.original_img = []
             self.gray_img = np.array([], dtype=np.uint8)
@@ -928,18 +1155,31 @@ class mainwindow(QtWidgets.QMainWindow):
             self.clear_layout(self.widget.layout())
             if self.filters_combo.currentIndex() != 2:
                 self.clear_layout(self.widget_2.layout())
+
     def apply_matching(self):
-        
-        if self.matching_combo.currentIndex()==0:
+
+        if self.matching_combo.currentIndex() == 0:
             MIN_MATCH_COUNT = 10
             # Convert images to grayscale
             gray1 = self.template_img
             gray2 = self.matching_img
 
             # Compute SIFT keypoints and descriptors
-            
-            kp1, des1 = sift.computeKeypointsAndDescriptors(self.template_img, sigma=1.6, num_intervals=3, assumed_blur=0.5, image_border_width=5)
-            kp2, des2 = sift.computeKeypointsAndDescriptors(self.matching_img, sigma=1.6, num_intervals=3, assumed_blur=0.5, image_border_width=5)
+
+            kp1, des1 = sift.computeKeypointsAndDescriptors(
+                self.template_img,
+                sigma=1.6,
+                num_intervals=3,
+                assumed_blur=0.5,
+                image_border_width=5,
+            )
+            kp2, des2 = sift.computeKeypointsAndDescriptors(
+                self.matching_img,
+                sigma=1.6,
+                num_intervals=3,
+                assumed_blur=0.5,
+                image_border_width=5,
+            )
 
             # Initialize and use FLANN
             FLANN_INDEX_KDTREE = 0
@@ -963,9 +1203,13 @@ class mainwindow(QtWidgets.QMainWindow):
                 self.template_img = cv2.cvtColor(self.template_img, cv2.COLOR_GRAY2BGR)
                 self.matching_img = cv2.cvtColor(self.matching_img, cv2.COLOR_GRAY2BGR)
                 # Assign the color image to the appropriate region in newimg
-                newimg[:self.template_img.shape[0], :self.template_img.shape[1], :] = self.template_img
+                newimg[
+                    : self.template_img.shape[0], : self.template_img.shape[1], :
+                ] = self.template_img
                 # newimg[:self.template_img.shape[0], :self.template_img.shape[1], :] = self.template_img
-                newimg[:self.matching_img.shape[0], self.template_img.shape[1]:, :] = self.matching_img
+                newimg[
+                    : self.matching_img.shape[0], self.template_img.shape[1] :, :
+                ] = self.matching_img
 
                 # Shift keypoints coordinates for the second image
                 for kp in kp2:
@@ -988,7 +1232,9 @@ class mainwindow(QtWidgets.QMainWindow):
                 # Convert the OpenCV image to QPixmap for displaying
                 height, width, channel = newimg.shape
                 bytesPerLine = 3 * width
-                qImg = QImage(newimg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
+                qImg = QImage(
+                    newimg.data, width, height, bytesPerLine, QImage.Format_RGB888
+                ).rgbSwapped()
                 pixmap = QPixmap.fromImage(qImg)
 
                 # Create a QGraphicsScene
@@ -1002,26 +1248,32 @@ class mainwindow(QtWidgets.QMainWindow):
 
                 # Set the scene to the QGraphicsView
                 self.graphicsView_9.setScene(scene)
-              
 
             else:
-                print("Not enough matches are found - %d/%d" % (len(good), MIN_MATCH_COUNT))
+                print(
+                    "Not enough matches are found - %d/%d"
+                    % (len(good), MIN_MATCH_COUNT)
+                )
 
-        elif self.matching_combo.currentIndex()==1:
+        elif self.matching_combo.currentIndex() == 1:
             self.matching_img = cv2.cvtColor(self.matching_img, cv2.COLOR_BGR2RGB)
             self.template_img = cv2.cvtColor(self.template_img, cv2.COLOR_BGR2RGB)
-            result=matching.template_matching(self.matching_img, self.template_img)
+            result = matching.template_matching(self.matching_img, self.template_img)
             if len(result.shape) == 2:  # Grayscale result
                 height, width = result.shape
                 bytes_per_line = width
-                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+                qimage = QImage(
+                    result.data, width, height, bytes_per_line, QImage.Format_Grayscale8
+                )
             elif len(result.shape) == 3:  # Color image
                 height, width, channel = result.shape
                 bytes_per_line = 3 * width
-                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                qimage = QImage(
+                    result.data, width, height, bytes_per_line, QImage.Format_RGB888
+                )
             else:
                 raise ValueError("Unsupported image shape")
-            
+
             # Resize the image
             qimage = qimage.scaled(self.graphicsView_9.size(), Qt.KeepAspectRatio)
 
@@ -1040,18 +1292,22 @@ class mainwindow(QtWidgets.QMainWindow):
         else:
             self.matching_img = cv2.cvtColor(self.matching_img, cv2.COLOR_BGR2RGB)
             self.template_img = cv2.cvtColor(self.template_img, cv2.COLOR_BGR2RGB)
-            result=matching.SSD(self.matching_img, self.template_img)
+            result = matching.SSD(self.matching_img, self.template_img)
             if len(result.shape) == 2:  # Grayscale result
                 height, width = result.shape
                 bytes_per_line = width
-                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+                qimage = QImage(
+                    result.data, width, height, bytes_per_line, QImage.Format_Grayscale8
+                )
             elif len(result.shape) == 3:  # Color image
                 height, width, channel = result.shape
                 bytes_per_line = 3 * width
-                qimage = QImage(result.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                qimage = QImage(
+                    result.data, width, height, bytes_per_line, QImage.Format_RGB888
+                )
             else:
                 raise ValueError("Unsupported image shape")
-            
+
             # Resize the image
             qimage = qimage.scaled(self.graphicsView_9.size(), Qt.KeepAspectRatio)
 
